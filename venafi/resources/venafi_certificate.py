@@ -25,6 +25,7 @@ from heat.engine import resource
 from heat.engine import support
 from heat.engine import translation
 
+from vcert import Connection
 
 NOVA_MICROVERSIONS = (MICROVERSION_KEY_TYPE,
                       MICROVERSION_USER) = ('2.2', '2.10')
@@ -37,21 +38,35 @@ class VenafiCertificate(resource.Resource):
     support_status = support.SupportStatus(version='2014.1')
 
     PROPERTIES = (
-        NAME
+        NAME,
+        CN
     ) = (
         'name',
+        'cn',
     )
 
     ATTRIBUTES = (
-        CERTIFICATE_ATTR
+        CERTIFICATE_ATTR,
+        PRIVATE_KEY,
+        CHAIN,
     ) = (
         'certificate',
+        'private_key',
+        'chain',
     )
 
     properties_schema = {
         NAME: properties.Schema(
             properties.Schema.STRING,
-            _('The name of the key pair.'),
+            _('The name of certificate'),
+            required=True,
+            constraints=[
+                constraints.Length(min=1, max=255)
+            ]
+        ),
+        CN: properties.Schema(
+            properties.Schema.STRING,
+            _('The common name of certificate'),
             required=True,
             constraints=[
                 constraints.Length(min=1, max=255)
@@ -64,6 +79,14 @@ class VenafiCertificate(resource.Resource):
             _('Venafi certificate.'),
             type=attributes.Schema.STRING
         ),
+        PRIVATE_KEY: attributes.Schema(
+            _('Venafi certificate.'),
+            type=attributes.Schema.STRING
+        ),
+        CHAIN: attributes.Schema(
+            _('Venafi certificate.'),
+            type=attributes.Schema.STRING
+        ),
     }
 
     default_client_name = 'nova'
@@ -73,6 +96,7 @@ class VenafiCertificate(resource.Resource):
     def __init__(self, name, json_snippet, stack):
         super(VenafiCertificate, self).__init__(name, json_snippet, stack)
         self._fake_ceritficate = 'fake certificate here'
+        self._conn = Connection()
 
     @property
     def venafi_certificate(self):
