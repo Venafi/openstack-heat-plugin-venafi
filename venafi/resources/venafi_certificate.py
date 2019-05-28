@@ -96,7 +96,7 @@ class VenafiCertificate(resource.Resource):
     def __init__(self, name, json_snippet, stack):
         super(VenafiCertificate, self).__init__(name, json_snippet, stack)
         self._fake_ceritficate = 'fake certificate here'
-        self._conn = Connection()
+        self._conn = Connection(fake=True)
 
     @property
     def venafi_certificate(self):
