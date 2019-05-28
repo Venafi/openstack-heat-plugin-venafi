@@ -1,9 +1,11 @@
 ##### Test instructions:
 1. Contribute into plugin https://github.com/Venafi/venafi-openstack-heat-plugin
 1. Update the plugin on  host:   
-`ssh stack@devstack-manager 
+```
+ ssh stack@devstack-manager 
  cd /usr/lib/heat/venafi-openstack-heat-plugin
- git pull`
+ git pull
+ ```
 1. Install necessary dependencies:   
 `pip install -f /usr/lib/heat/venafi-openstack-heat-plugin/requirements.txt`
 1.  Restart heat engine services: `sudo systemctl status devstack@h-eng`
