@@ -8,6 +8,6 @@
  ```
 1. Install necessary dependencies:   
 `pip install -f /usr/lib/heat/venafi-openstack-heat-plugin/requirements.txt`
-1.  Restart heat engine services: `sudo systemctl status devstack@h-eng`
+1.  Restart heat engine service: `sudo systemctl restart devstack@h-eng`
 1. Try to create  a stack: `openstack stack create --template   ~/devstack/venafi_certificate.yaml venafi_cert_test`
 1. Look into logs: `journalctl -u devstack@h-api.service --since "5 minutes ago"`
