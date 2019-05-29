@@ -25,7 +25,7 @@ from heat.engine import resource
 from heat.engine import support
 from heat.engine import translation
 
-from vcert import Connection
+from vcert import Connection, CertificateRequest
 
 NOVA_MICROVERSIONS = (MICROVERSION_KEY_TYPE,
                       MICROVERSION_USER) = ('2.2', '2.10')
@@ -39,10 +39,25 @@ class VenafiCertificate(resource.Resource):
 
     PROPERTIES = (
         NAME,
-        CN
+        CN,
+        KEY_PASSWORD,
+        KEY_TYPE,
+        KEY_LENGTH,
+        KEY_CURVE,
+        SANs,
+
+
+        ZONE,
     ) = (
         'name',
-        'cn',
+        'common_name',
+        'key_password',
+        'key_type',
+        'key_length',
+        'key_curve',
+        'sans',
+
+        'zone',
     )
 
     ATTRIBUTES = (
@@ -72,6 +87,35 @@ class VenafiCertificate(resource.Resource):
                 constraints.Length(min=1, max=255)
             ]
         ),
+        KEY_TYPE: properties.Schema(
+            properties.Schema.STRING,
+            _("Cryptography key type"),
+            default="RSA",
+            constraints=[constraints.AllowedValues(("RSA", "ECDSA"))],
+        ),
+        KEY_LENGTH: properties.Schema(
+            properties.Schema.INTEGER,
+            _("Key length (only for RSA key_type)"),
+            default=2048,
+            constraints=[constraints.AllowedValues((1024, 2048, 4096, 8192))],
+        ),
+        KEY_CURVE: properties.Schema(
+            properties.Schema.STRING,
+            _("Key curve (only for ecdsa key_type)"),
+            default="p521",
+            constraints=[constraints.AllowedValues(("p521", "p256", "p224", "p384"))],
+        ),
+        SANs: properties.Schema(
+            properties.Schema.LIST,
+            _("List of Subject Alternative Names"),
+            default=tuple(),
+        ),
+        ZONE: properties.Schema(
+            properties.Schema.STRING,
+            _("Venafi Trust Platform or Cloud zone name"),
+            required=True,
+            constraints=[constraints.Length(min=1, max=255)]
+        ),
     }
 
     attributes_schema = {
@@ -95,16 +139,65 @@ class VenafiCertificate(resource.Resource):
 
     def __init__(self, name, json_snippet, stack):
         super(VenafiCertificate, self).__init__(name, json_snippet, stack)
-        self._fake_ceritficate = 'fake certificate here'
-        self._conn = Connection()
+
 
     @property
     def venafi_certificate(self):
         """Return Venafi certificate for the resource."""
-        return self._fake_ceritficate
+        return 'fake certificate here'
 
     def get_reference_id(self):
         return self.resource_id
+
+
+    def enroll(self,  common_name, sans, privatekey_passphrase, privatekey_type, curve, key_size):
+        request = CertificateRequest(
+            common_name,
+            privatekey_passphrase,
+        )
+
+        if privatekey_type:
+            key_type = {"RSA": "rsa", "ECDSA": "ec", "EC": "ec"}.get(privatekey_type)
+            if not key_type:
+                raise Exception("Failed to determine key type: %s. "
+                                "Must be RSA or ECDSA" % privatekey_type)
+            request.key_type = key_type
+            request.key_curve = curve
+            request.key_length = key_size
+
+        san_dns = sans  # todo
+        ip_addresses = []
+        email_addresses = []
+        request.ip_addresses = ip_addresses
+        request.san_dns = san_dns
+        request.email_addresses = email_addresses
+
+        conn = Connection()
+        conn.request_cert(request, zone)
+
+        while True:
+            cert = conn.retrieve_cert(request)  # vcert.Certificate
+            if cert:
+                break
+            else:
+                time.sleep(5)
+
+        return {self.CHAIN: cert.chain, self.CERTIFICATE_ATTR : cert.cert, self.PRIVATE_KEY: request.private_key_pem}
+
+    def enroll(self):
+        return self._enroll(self.properties[self.CN], self.properties[self.SANs],
+                     self.properties[self.KEY_PASSWORD], self.properties[self.KEY_TYPE], self.properties[self.KEY_CURVE], self.properties[self.KEY_LENGTH])
+
+    def _resolve_attribute(self, name):
+
+        if not self._cache:
+            self._cache = self.enroll()
+
+        if name not in self._cache:
+
+            raise exception.InvalidTemplateAttribute(name)
+        return self._cache[name]
+
 
 def resource_mapping():
     return {'OS::Nova::VenafiCertificate': VenafiCertificate}
