@@ -140,7 +140,6 @@ class VenafiCertificate(resource.Resource):
     def __init__(self, name, json_snippet, stack):
         super(VenafiCertificate, self).__init__(name, json_snippet, stack)
 
-
     @property
     def venafi_certificate(self):
         """Return Venafi certificate for the resource."""
