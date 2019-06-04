@@ -31,4 +31,11 @@ setup(
     url='https://github.com/Venafi/venafi-openstack-heat-plugins/',
     keywords=['venafi', 'openstack', 'heat', 'ssl', 'certificates'],
     install_requires=[],
+    classifiers=[
+        'Development Status :: 2 - Pre-Alpha',
+        'License :: OSI Approved :: Apache Software License',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python',
+        'Intended Audience :: System Administrators',
+    ]
 )

@@ -29,7 +29,7 @@ from heat.tests import common
 from heat.tests import utils
 
 
-class TestVenafiCeritifcate(common.HeatTestCase):
+class TestVenafiCertificate(common.HeatTestCase):
 
     venafi_fake_cert_defn = '''
     heat_template_version: 2014-10-16
