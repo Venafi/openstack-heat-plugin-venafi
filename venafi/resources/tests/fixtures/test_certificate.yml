@@ -1,0 +1,20 @@
+# http://docs.openstack.org/developer/heat/template_guide/hot_spec.html#heat-template-version
+heat_template_version: 2016-04-08
+
+
+description: >
+   Venafi testing certificate
+
+resources:
+  fake_certificate:
+    type: OS::Nova::VenafiCertificate
+    properties:
+      name: 'venafi certificate'
+      zone: 'fake'
+      common_name: 'fake.cert.example.com'
+
+outputs:
+
+  venafi_certificate:
+    description: 'Venafi certificate'
+    value: { get_attr: [fake_certificate, certificate] }
