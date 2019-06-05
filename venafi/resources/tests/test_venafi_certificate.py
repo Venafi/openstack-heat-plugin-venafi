@@ -67,7 +67,6 @@ class TestVenafiCertificate:
         stack.store()
         return stack
 
-    # @mock.patch('sys.stdin', new=open("/dev/null"))
     def deploy_venafi_cert(self):
         c = Connection('devstack-manager')
         result = c.run('uname -s', hide=True)
@@ -78,11 +77,6 @@ class TestVenafiCertificate:
     @mock.patch('sys.stdin', new=open("/dev/null"))
     def test_venafi_fake_cert(self):
         c = Connection('devstack-manager')
-        result = c.run('uname -s', hide=True)
+        result = c.run('cd /usr/lib/heat/venafi-openstack-heat-plugin/ && git pull')
         msg = "Ran {0.command!r} on {0.connection.host}, got stdout:\n{0.stdout}"
-        print("directly:\n {}".format(msg.format(result)))
-        msg = self.deploy_venafi_cert
-        print("from function:\n {}".format(msg))
-        # stack = self.create_stack(self.venafi_fake_cert_defn)
-        # secret1 = stack['secret1']
-        # self.assertEqual('secret1', secret1.FnGetRefId())
+        print(msg.format(result))
