@@ -28,6 +28,8 @@ from heat.engine import template
 from heat.tests import common
 from heat.tests import utils
 from fabric import Connection
+import pytest
+from invoke import UnexpectedExit
 
 
 class TestVenafiCertificate:
@@ -77,6 +79,17 @@ class TestVenafiCertificate:
     @mock.patch('sys.stdin', new=open("/dev/null"))
     def test_venafi_fake_cert(self):
         c = Connection('devstack-manager')
-        result = c.run('cd /usr/lib/heat/venafi-openstack-heat-plugin/ && git pull')
         msg = "Ran {0.command!r} on {0.connection.host}, got stdout:\n{0.stdout}"
+        result = c.run('cd /usr/lib/heat/venafi-openstack-heat-plugin/ && git pull')
         print(msg.format(result))
+        result = c.run('sudo systemctl restart devstack@h-eng')
+        print(msg.format(result))
+        try:
+            result = c.run('journalctl -q -u devstack@h-eng.service --since '
+                           '"5 minutes ago"|grep "OS::Nova::VenafiCertificate"')
+        except UnexpectedExit as e:
+            print(e.result)
+            pytest.fail("Didn't find plugin registration message in the logs")
+        print(msg.format(result))
+        # print(result)
+        # if result.stdout
