@@ -1,3 +1,6 @@
 openstack-heat
 vcert
 fabric
+python-heatclient
+keystoneauth1
+six

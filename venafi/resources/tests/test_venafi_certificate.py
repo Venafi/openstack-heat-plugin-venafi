@@ -27,9 +27,13 @@ from heat.engine import stack as parser
 from heat.engine import template
 from heat.tests import common
 from heat.tests import utils
-from fabric import Connection
+from fabric import Connection as fabricConnection
 import pytest
 from invoke import UnexpectedExit
+from heatclient import client as heat_client
+from keystoneauth1 import loading
+from keystoneauth1 import session
+import os
 
 
 class TestVenafiCertificate:
@@ -70,7 +74,7 @@ class TestVenafiCertificate:
         return stack
 
     def deploy_venafi_cert(self):
-        c = Connection('devstack-manager')
+        c = fabricConnection('devstack-manager')
         result = c.run('uname -s', hide=True)
         msg = "Ran {0.command!r} on {0.connection.host}, got stdout:\n{0.stdout}"
         formated = msg.format(result)
@@ -78,18 +82,34 @@ class TestVenafiCertificate:
 
     @mock.patch('sys.stdin', new=open("/dev/null"))
     def test_venafi_fake_cert(self):
-        c = Connection('devstack-manager')
-        msg = "Ran {0.command!r} on {0.connection.host}, got stdout:\n{0.stdout}"
-        result = c.run('cd /usr/lib/heat/venafi-openstack-heat-plugin/ && git pull')
-        print(msg.format(result))
-        result = c.run('sudo systemctl restart devstack@h-eng')
-        print(msg.format(result))
-        try:
-            result = c.run('journalctl -q -u devstack@h-eng.service --since '
-                           '"5 minutes ago"|grep "OS::Nova::VenafiCertificate"')
-        except UnexpectedExit as e:
-            print(e.result)
-            pytest.fail("Didn't find plugin registration message in the logs")
-        print(msg.format(result))
+        # c = fabricConnection('devstack-manager')
+        # msg = "Ran {0.command!r} on {0.connection.host}, got stdout:\n{0.stdout}"
+        # result = c.run('cd /usr/lib/heat/venafi-openstack-heat-plugin/ && git pull')
+        # print(msg.format(result))
+        # result = c.run('sudo systemctl restart devstack@h-eng')
+        # print(msg.format(result))
+        # try:
+        #     result = c.run('journalctl -q -u devstack@h-eng.service --since '
+        #                    '"5 minutes ago"|grep "OS::Nova::VenafiCertificate"')
+        # except UnexpectedExit as e:
+        #     print(e.result)
+        #     pytest.fail("Didn't find plugin registration message in the logs")
+        # print(msg.format(result))
         # print(result)
         # if result.stdout
+
+
+        kwargs = {
+            'auth_url': os.environ['OS_AUTH_URL'],
+            'username':'demo',
+            'password': os.environ['OS_PASSWORD'],
+            'project_name': 'demo',
+            'user_domain_name': 'default',
+            'project_domain_name': 'default'
+        }
+        loader = loading.get_plugin_loader('password')
+        auth = loader.load_from_options(**kwargs)
+        sess = session.Session(auth=auth, verify=False)
+        client = heat_client.Client('1', session=sess, endpoint_type='public', service_type='orchestration')
+        for stack in client.stacks.list():
+            print(stack)
