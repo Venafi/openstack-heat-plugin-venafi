@@ -150,7 +150,6 @@ class TestVenafiCertificate:
         # print(stack.outputs)
         if stack.outputs[0]['output_value'] == None:
             print(stack.outputs[0]['output_error'])
-            print(stack.outputs)
             pytest.fail("No output values found")
         res = client.resources.get(stack.id, 'fake_certificate')
         if res.resource_status == 'CREATE_COMPLETE':
@@ -159,5 +158,5 @@ class TestVenafiCertificate:
             print("Resource not found")
         # for stack in client.stacks.list():
         #     print(stack)
-        if stack.outputs[0]['output_value'] != 'fake certificate here1':
+        if stack.outputs[0]['output_value'] != 'fake certificate here2':
             pytest.fail("Wrong output")
