@@ -82,21 +82,21 @@ class TestVenafiCertificate:
 
     @mock.patch('sys.stdin', new=open("/dev/null"))
     def test_venafi_fake_cert(self):
-        # c = fabricConnection('devstack-manager')
-        # msg = "Ran {0.command!r} on {0.connection.host}, got stdout:\n{0.stdout}"
-        # result = c.run('cd /usr/lib/heat/venafi-openstack-heat-plugin/ && git pull')
-        # print(msg.format(result))
-        # result = c.run('sudo systemctl restart devstack@h-eng')
-        # print(msg.format(result))
-        # try:
-        #     result = c.run('journalctl -q -u devstack@h-eng.service --since '
-        #                    '"5 minutes ago"|grep "OS::Nova::VenafiCertificate"')
-        # except UnexpectedExit as e:
-        #     print(e.result)
-        #     pytest.fail("Didn't find plugin registration message in the logs")
-        # print(msg.format(result))
-        # print(result)
-        # if result.stdout
+        c = fabricConnection('devstack-manager')
+        msg = "Ran {0.command!r} on {0.connection.host}, got stdout:\n{0.stdout}"
+        result = c.run('cd /usr/lib/heat/venafi-openstack-heat-plugin/ && git pull')
+        print(msg.format(result))
+        result = c.run('sudo systemctl restart devstack@h-eng')
+        print(msg.format(result))
+        try:
+            result = c.run('journalctl -q -u devstack@h-eng.service --since '
+                           '"5 minutes ago"|grep "OS::Nova::VenafiCertificate"')
+        except UnexpectedExit as e:
+            print(e.result)
+            pytest.fail("Didn't find plugin registration message in the logs")
+        print(msg.format(result))
+        print(result)
+        if result.stdout
 
 
         kwargs = {
@@ -110,6 +110,9 @@ class TestVenafiCertificate:
         loader = loading.get_plugin_loader('password')
         auth = loader.load_from_options(**kwargs)
         sess = session.Session(auth=auth, verify=False)
-        client = heat_client.Client('1', session=sess, endpoint_type='public', service_type='orchestration')
+        client = heat_client.Client('1', session=sess,
+                                    endpoint_type='public',
+                                    service_type='orchestration',
+                                    endpoint=os.environ['OS_HEAT_URL'])
         for stack in client.stacks.list():
             print(stack)
