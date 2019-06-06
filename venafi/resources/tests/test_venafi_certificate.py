@@ -90,6 +90,8 @@ class TestVenafiCertificate:
         print(msg.format(result))
         result = c.run('sudo systemctl restart devstack@h-eng')
         print(msg.format(result))
+        # TODO: rewrite sleep to check of "systemctl status devstack@h-eng"
+        time.sleep(10)
         try:
             result = c.run('journalctl -q -u devstack@h-eng.service --since '
                            '"5 minutes ago"|grep "OS::Nova::VenafiCertificate"')
@@ -126,11 +128,13 @@ class TestVenafiCertificate:
         # Searlize it into a stream
         s_template = yaml.safe_dump(template)
         client.stacks.create(stack_name=stack_name, template=s_template)
+        # TODO: rewrite sleep to check of stack status
         time.sleep(10)
         stack = client.stacks.get(stack_name)
         # print(stack.outputs)
         if stack.outputs[0]['output_value'] == None:
             print(stack.outputs[0]['output_error'])
+            print(stack.outputs)
             pytest.fail("No output values found")
         # res = client.resources.get(stack.id, 'certificate')
         # if res.resource_status == 'CREATE_COMPLETE':
