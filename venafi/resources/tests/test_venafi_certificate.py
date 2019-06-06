@@ -27,9 +27,7 @@ from heat.engine import stack as parser
 from heat.engine import template
 from heat.tests import common
 from heat.tests import utils
-from fabric import Connection as fabricConnection
 import pytest
-from invoke import UnexpectedExit
 from heatclient import client as heat_client
 from keystoneauth1 import loading
 from keystoneauth1 import session
@@ -82,26 +80,6 @@ class TestVenafiCertificate:
         stack.store()
         return stack
 
-    @mock.patch('sys.stdin', new=open("/dev/null"))
-    def test_deploy_venafi_cert_plugin(self):
-        c = fabricConnection('devstack-manager')
-        msg = "Ran {0.command!r} on {0.connection.host}, got stdout:\n{0.stdout}"
-        result = c.run('cd /usr/lib/heat/venafi-openstack-heat-plugin/ && git pull')
-        print(msg.format(result))
-        result = c.run('sudo systemctl restart devstack@h-eng')
-        print(msg.format(result))
-        # TODO: rewrite sleep to check of "systemctl status devstack@h-eng"
-        time.sleep(10)
-        try:
-            result = c.run('journalctl -q -u devstack@h-eng.service --since '
-                           '"5 minutes ago"|grep "OS::Nova::VenafiCertificate"')
-        except UnexpectedExit as e:
-            print(e.result)
-            pytest.fail("Didn't find plugin registration message in the logs")
-        print(msg.format(result))
-        print(result)
-
-    @mock.patch('sys.stdin', new=open("/dev/null"))
     def test_venafi_fake_cert(self):
         kwargs = {
             'auth_url': os.environ['OS_AUTH_URL'],
