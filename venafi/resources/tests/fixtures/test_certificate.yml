@@ -1,5 +1,5 @@
 # http://docs.openstack.org/developer/heat/template_guide/hot_spec.html#heat-template-version
-heat_template_version: 2016-04-08
+heat_template_version: 2014-10-16
 
 
 description: >

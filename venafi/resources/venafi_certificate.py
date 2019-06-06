@@ -24,6 +24,7 @@ from heat.engine import properties
 from heat.engine import resource
 from heat.engine import support
 from heat.engine import translation
+import time
 
 from vcert import Connection, CertificateRequest
 
@@ -45,8 +46,6 @@ class VenafiCertificate(resource.Resource):
         KEY_LENGTH,
         KEY_CURVE,
         SANs,
-
-
         ZONE,
     ) = (
         'name',
@@ -149,7 +148,7 @@ class VenafiCertificate(resource.Resource):
         return self.resource_id
 
 
-    def enroll(self,  common_name, sans, privatekey_passphrase, privatekey_type, curve, key_size):
+    def enroll(self,  common_name, sans, privatekey_passphrase, privatekey_type, curve, key_size, zone):
         request = CertificateRequest(
             common_name,
             privatekey_passphrase,

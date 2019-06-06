@@ -128,7 +128,10 @@ class TestVenafiCertificate:
         client.stacks.create(stack_name=stack_name, template=s_template)
         time.sleep(10)
         stack = client.stacks.get(stack_name)
-        print(stack.outputs)
+        # print(stack.outputs)
+        if stack.outputs[0]['output_value'] == None:
+            print(stack.outputs[0]['output_error'])
+            pytest.fail("No output values found")
         # res = client.resources.get(stack.id, 'certificate')
         # if res.resource_status == 'CREATE_COMPLETE':
         #     print(stack.outputs)
