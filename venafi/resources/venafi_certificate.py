@@ -120,14 +120,15 @@ class VenafiCertificate(resource.Resource):
     attributes_schema = {
         CERTIFICATE_ATTR: attributes.Schema(
             _('Venafi certificate.'),
+            cache_mode=attributes.Schema.CACHE_NONE,
             type=attributes.Schema.STRING
         ),
         PRIVATE_KEY: attributes.Schema(
-            _('Venafi certificate.'),
+            _('Venafi certificate private key.'),
             type=attributes.Schema.STRING
         ),
         CHAIN: attributes.Schema(
-            _('Venafi certificate.'),
+            _('Venafi certificate chain.'),
             type=attributes.Schema.STRING
         ),
     }
