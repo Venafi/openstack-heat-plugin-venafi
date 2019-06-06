@@ -14,7 +14,5 @@ resources:
       common_name: 'fake.cert.example.com'
 
 outputs:
-
-  venafi_certificate:
-    description: 'Venafi certificate'
+  fake_certificate:
     value: { get_attr: [fake_certificate, certificate] }
