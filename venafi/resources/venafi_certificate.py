@@ -196,6 +196,8 @@ class VenafiCertificate(resource.Resource):
             raise exception.InvalidTemplateAttribute(name)
         return self._cache[name]
 
+    def get_reference_id(self):
+        return self.resource_id
 
 def resource_mapping():
     return {'OS::Nova::VenafiCertificate': VenafiCertificate}
