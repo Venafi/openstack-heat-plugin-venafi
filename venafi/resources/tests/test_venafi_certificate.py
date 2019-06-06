@@ -80,6 +80,44 @@ class TestVenafiCertificate:
         stack.store()
         return stack
 
+    # Testing random string template to check that Heat is operating normally.
+    def test_random_string(self):
+        kwargs = {
+            'auth_url': os.environ['OS_AUTH_URL'],
+            'username':'demo',
+            'password': os.environ['OS_PASSWORD'],
+            'project_name': 'demo',
+            'user_domain_name': 'default',
+            'project_domain_name': 'default'
+        }
+
+        loader = loading.get_plugin_loader('password')
+        auth = loader.load_from_options(**kwargs)
+        sess = session.Session(auth=auth, verify=False)
+        client = heat_client.Client('1', session=sess,
+                                    endpoint_type='public',
+                                    service_type='orchestration',
+                                    endpoint=os.environ['OS_HEAT_URL'])
+
+        template_path = 'fixtures/random_string.yml'
+        stack_name = 'random_string_stack_'+randomString(10)
+        print(stack_name)
+        # Load the template
+        _files, template = template_utils.get_template_contents(template_path)
+        # Searlize it into a stream
+        s_template = yaml.safe_dump(template)
+        client.stacks.create(stack_name=stack_name, template=s_template)
+        # TODO: rewrite sleep to check of stack status
+        time.sleep(10)
+        stack = client.stacks.get(stack_name)
+        # print(stack.outputs)
+        if stack.outputs[0]['output_value'] == None:
+            print(stack.outputs[0]['output_error'])
+            print(stack.outputs)
+            pytest.fail("No output values found")
+        else:
+            print(stack.outputs)
+
     def test_venafi_fake_cert(self):
         kwargs = {
             'auth_url': os.environ['OS_AUTH_URL'],
