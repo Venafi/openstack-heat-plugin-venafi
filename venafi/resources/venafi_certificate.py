@@ -145,7 +145,7 @@ class VenafiCertificate(resource.Resource):
     @property
     def venafi_certificate(self):
         """Return Venafi certificate for the resource."""
-        return 'fake certificate here'
+        return 'fake certificate here1'
 
     def enroll(self,  common_name, sans, privatekey_passphrase, privatekey_type, curve, key_size, zone):
         request = CertificateRequest(

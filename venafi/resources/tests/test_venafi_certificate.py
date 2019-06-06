@@ -159,5 +159,5 @@ class TestVenafiCertificate:
             print("Resource not found")
         # for stack in client.stacks.list():
         #     print(stack)
-        if stack.outputs[0]['output_value'] != 'fake certificate here':
+        if stack.outputs[0]['output_value'] != 'fake certificate here1':
             pytest.fail("Wrong output")
