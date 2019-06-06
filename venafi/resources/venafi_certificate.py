@@ -147,10 +147,6 @@ class VenafiCertificate(resource.Resource):
         """Return Venafi certificate for the resource."""
         return 'fake certificate here'
 
-    def get_reference_id(self):
-        return self.resource_id
-
-
     def enroll(self,  common_name, sans, privatekey_passphrase, privatekey_type, curve, key_size, zone):
         request = CertificateRequest(
             common_name,
@@ -189,15 +185,19 @@ class VenafiCertificate(resource.Resource):
         return self._enroll(self.properties[self.CN], self.properties[self.SANs],
                      self.properties[self.KEY_PASSWORD], self.properties[self.KEY_TYPE], self.properties[self.KEY_CURVE], self.properties[self.KEY_LENGTH])
 
-    def _resolve_attribute(self, name):
+    # def _resolve_attribute(self, name):
+    #
+    #     if not self._cache:
+    #         self._cache = self.enroll()
+    #
+    #     if name not in self._cache:
+    #
+    #         raise exception.InvalidTemplateAttribute(name)
+    #     return self._cache[name]
 
-        if not self._cache:
-            self._cache = self.enroll()
+    def get_reference_id(self):
+        return self.resource_id
 
-        if name not in self._cache:
-
-            raise exception.InvalidTemplateAttribute(name)
-        return self._cache[name]
 
 
 def resource_mapping():
