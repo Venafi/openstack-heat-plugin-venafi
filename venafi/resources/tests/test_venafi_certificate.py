@@ -73,15 +73,8 @@ class TestVenafiCertificate:
         stack.store()
         return stack
 
-    def deploy_venafi_cert(self):
-        c = fabricConnection('devstack-manager')
-        result = c.run('uname -s', hide=True)
-        msg = "Ran {0.command!r} on {0.connection.host}, got stdout:\n{0.stdout}"
-        formated = msg.format(result)
-        return formated
-
     @mock.patch('sys.stdin', new=open("/dev/null"))
-    def test_venafi_fake_cert(self):
+    def test_deploy_venafi_cert_plugin(self):
         c = fabricConnection('devstack-manager')
         msg = "Ran {0.command!r} on {0.connection.host}, got stdout:\n{0.stdout}"
         result = c.run('cd /usr/lib/heat/venafi-openstack-heat-plugin/ && git pull')
@@ -96,9 +89,9 @@ class TestVenafiCertificate:
             pytest.fail("Didn't find plugin registration message in the logs")
         print(msg.format(result))
         print(result)
-        if result.stdout
 
-
+    @mock.patch('sys.stdin', new=open("/dev/null"))
+    def test_venafi_fake_cert(self):
         kwargs = {
             'auth_url': os.environ['OS_AUTH_URL'],
             'username':'demo',
@@ -107,6 +100,7 @@ class TestVenafiCertificate:
             'user_domain_name': 'default',
             'project_domain_name': 'default'
         }
+
         loader = loading.get_plugin_loader('password')
         auth = loader.load_from_options(**kwargs)
         sess = session.Session(auth=auth, verify=False)
