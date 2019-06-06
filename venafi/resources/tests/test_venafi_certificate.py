@@ -33,8 +33,17 @@ from invoke import UnexpectedExit
 from heatclient import client as heat_client
 from keystoneauth1 import loading
 from keystoneauth1 import session
+from heatclient.common import template_utils
+import yaml
 import os
+import random
+import string
+import time
 
+def randomString(stringLength=10):
+    """Generate a random string of fixed length """
+    letters = string.ascii_lowercase
+    return ''.join(random.choice(letters) for i in range(stringLength))
 
 class TestVenafiCertificate:
 
@@ -108,5 +117,22 @@ class TestVenafiCertificate:
                                     endpoint_type='public',
                                     service_type='orchestration',
                                     endpoint=os.environ['OS_HEAT_URL'])
-        for stack in client.stacks.list():
-            print(stack)
+
+        template_path = 'fixtures/test_certificate.yml'
+        stack_name = 'fake_cert_stack_'+randomString(10)
+        print(stack_name)
+        # Load the template
+        _files, template = template_utils.get_template_contents(template_path)
+        # Searlize it into a stream
+        s_template = yaml.safe_dump(template)
+        client.stacks.create(stack_name=stack_name, template=s_template)
+        time.sleep(10)
+        stack = client.stacks.get(stack_name)
+        print(stack.outputs)
+        # res = client.resources.get(stack.id, 'certificate')
+        # if res.resource_status == 'CREATE_COMPLETE':
+        #     print(stack.outputs)
+        # else:
+        #     print("Resource not found")
+        # for stack in client.stacks.list():
+        #     print(stack)
