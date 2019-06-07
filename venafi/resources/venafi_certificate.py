@@ -175,9 +175,9 @@ class VenafiCertificate(resource.Resource):
         LOG.info("zone is %s", zone)
         LOG.info("Creating request with CN %s", common_name)
         request = CertificateRequest(
-            common_name,
-            privatekey_passphrase,
+            common_name=common_name,
         )
+
 
 
         if privatekey_type:
@@ -197,9 +197,8 @@ class VenafiCertificate(resource.Resource):
         request.email_addresses = email_addresses
 
 
-        LOG.info("Requesting certificate")
         self.conn.request_cert(request, zone)
-        LOG.info("CSR: %s", request.csr)
+        LOG.info("CSR is: %s", request.csr)
         while True:
             LOG.info("Trying to retrieve certificate")
             cert = self.conn.retrieve_cert(request)  # vcert.Certificate
