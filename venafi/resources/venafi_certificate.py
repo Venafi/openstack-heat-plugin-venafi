@@ -24,12 +24,14 @@ from heat.engine import properties
 from heat.engine import resource
 from heat.engine import support
 import time
+from oslo_log import log as logging
 
 from vcert import Connection, CertificateRequest
 
 NOVA_MICROVERSIONS = (MICROVERSION_KEY_TYPE,
                       MICROVERSION_USER) = ('2.2', '2.10')
 
+LOG = logging.getLogger(__name__)
 
 class VenafiCertificate(resource.Resource):
     """A resource for creating Venafi certificates.
@@ -86,6 +88,11 @@ class VenafiCertificate(resource.Resource):
             constraints=[
                 constraints.Length(min=1, max=255)
             ]
+        ),
+        KEY_PASSWORD: properties.Schema(
+            properties.Schema.STRING,
+            _("Cryptography key password"),
+            default=None,
         ),
         KEY_TYPE: properties.Schema(
             properties.Schema.STRING,
@@ -149,12 +156,28 @@ class VenafiCertificate(resource.Resource):
     def get_reference_id(self):
         return self.resource_id
 
-
-    def enroll(self,  common_name, sans, privatekey_passphrase, privatekey_type, curve, key_size, zone):
+    def enroll(self):
+        LOG.info("Running enroll")
+        common_name = self.properties[self.CN]
+        LOG.info("common name is %s", common_name)
+        sans = self.properties[self.SANs]
+        LOG.info("sans is %s", sans)
+        privatekey_passphrase = self.properties[self.KEY_PASSWORD]
+        LOG.info("privatekey_passphrase is %s", privatekey_passphrase)
+        privatekey_type = self.properties[self.KEY_TYPE]
+        LOG.info("privatekey_type is %s", privatekey_type)
+        curve = self.properties[self.KEY_CURVE]
+        LOG.info("curve is %s", curve)
+        key_size = self.properties[self.KEY_LENGTH]
+        LOG.info("key_size is %s", key_size)
+        zone = self.properties[self.ZONE]
+        LOG.info("zone is %s", zone)
+        LOG.info("Creating request witch CN %s", common_name)
         request = CertificateRequest(
             common_name,
             privatekey_passphrase,
         )
+
 
         if privatekey_type:
             key_type = {"RSA": "rsa", "ECDSA": "ec", "EC": "ec"}.get(privatekey_type)
@@ -172,7 +195,7 @@ class VenafiCertificate(resource.Resource):
         request.san_dns = san_dns
         request.email_addresses = email_addresses
 
-        conn = Connection()
+        conn = Connection(fake=True)
         conn.request_cert(request, zone)
 
         while True:
@@ -184,20 +207,24 @@ class VenafiCertificate(resource.Resource):
 
         return {self.CHAIN: cert.chain, self.CERTIFICATE_ATTR : cert.cert, self.PRIVATE_KEY: request.private_key_pem}
 
-    def enroll(self):
-        return self.enroll(self.properties[self.CN], self.properties[self.SANs],
-                     self.properties[self.KEY_PASSWORD], self.properties[self.KEY_TYPE],
-                     self.properties[self.KEY_CURVE], self.properties[self.KEY_LENGTH]), self.properties[self.ZONE]
 
     def _resolve_attribute(self, name):
 
-        if not self._cache:
-            self._cache = self.enroll()
+        LOG.info("Trying to get values from cache")
+        # if self._cache is None:
+        #     self._cache = self.enroll()
 
-        if name not in self._cache:
+        # if name not in self._cache:
+        #     raise exception.InvalidTemplateAttribute
+        # self._cache = self.enroll()
 
-            raise exception.InvalidTemplateAttribute(name)
+        self._cache = self.enroll()
         return self._cache[name]
+        # d = {'certificate':'cert1111',
+        # 'private_key':'pk1',
+        # 'chain':'chhh1111',}
+        # return d[name]
+
 
 
 def resource_mapping():
