@@ -38,6 +38,8 @@ import random
 import string
 import time
 
+PWD = os.path.dirname(os.path.abspath(__file__))
+
 def randomString(stringLength=10):
     """Generate a random string of fixed length """
     letters = string.ascii_lowercase
@@ -99,7 +101,7 @@ class TestVenafiCertificate:
                                     service_type='orchestration',
                                     endpoint=os.environ['OS_HEAT_URL'])
 
-        template_path = 'fixtures/random_string.yml'
+        template_path = PWD+'/fixtures/random_string.yml'
         stack_name = 'random_string_stack_'+randomString(10)
         print(stack_name)
         # Load the template
@@ -136,7 +138,7 @@ class TestVenafiCertificate:
                                     service_type='orchestration',
                                     endpoint=os.environ['OS_HEAT_URL'])
 
-        template_path = 'fixtures/test_certificate.yml'
+        template_path = PWD+'/fixtures/test_certificate.yml'
         stack_name = 'fake_cert_stack_'+randomString(10)
         print(stack_name)
         # Load the template
