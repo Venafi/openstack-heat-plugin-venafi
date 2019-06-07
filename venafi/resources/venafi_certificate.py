@@ -23,7 +23,6 @@ from heat.engine import constraints
 from heat.engine import properties
 from heat.engine import resource
 from heat.engine import support
-from heat.engine import translation
 import time
 
 from vcert import Connection, CertificateRequest
@@ -46,6 +45,8 @@ class VenafiCertificate(resource.Resource):
         KEY_LENGTH,
         KEY_CURVE,
         SANs,
+
+
         ZONE,
     ) = (
         'name',
@@ -120,17 +121,14 @@ class VenafiCertificate(resource.Resource):
     attributes_schema = {
         CERTIFICATE_ATTR: attributes.Schema(
             _('Venafi certificate.'),
-            cache_mode=attributes.Schema.CACHE_NONE,
             type=attributes.Schema.STRING
         ),
         PRIVATE_KEY: attributes.Schema(
-            _('Venafi certificate private key.'),
-            cache_mode=attributes.Schema.CACHE_NONE,
+            _('Venafi certificate.'),
             type=attributes.Schema.STRING
         ),
         CHAIN: attributes.Schema(
-            _('Venafi certificate chain.'),
-            cache_mode=attributes.Schema.CACHE_NONE,
+            _('Venafi certificate.'),
             type=attributes.Schema.STRING
         ),
     }
@@ -141,11 +139,16 @@ class VenafiCertificate(resource.Resource):
 
     def __init__(self, name, json_snippet, stack):
         super(VenafiCertificate, self).__init__(name, json_snippet, stack)
+        self._cache = None
 
     @property
     def venafi_certificate(self):
         """Return Venafi certificate for the resource."""
-        return 'fake certificate here2'
+        return 'fake certificate here'
+
+    def get_reference_id(self):
+        return self.resource_id
+
 
     def enroll(self,  common_name, sans, privatekey_passphrase, privatekey_type, curve, key_size, zone):
         request = CertificateRequest(
@@ -182,23 +185,19 @@ class VenafiCertificate(resource.Resource):
         return {self.CHAIN: cert.chain, self.CERTIFICATE_ATTR : cert.cert, self.PRIVATE_KEY: request.private_key_pem}
 
     def enroll(self):
-        return self._enroll(self.properties[self.CN], self.properties[self.SANs],
-                     self.properties[self.KEY_PASSWORD], self.properties[self.KEY_TYPE], self.properties[self.KEY_CURVE], self.properties[self.KEY_LENGTH])
+        return self.enroll(self.properties[self.CN], self.properties[self.SANs],
+                     self.properties[self.KEY_PASSWORD], self.properties[self.KEY_TYPE],
+                     self.properties[self.KEY_CURVE], self.properties[self.KEY_LENGTH]), self.properties[self.ZONE]
 
     def _resolve_attribute(self, name):
-        # if not self._cache:
-        #     self._cache = self.enroll()
-        #
-        # if name not in self._cache:
-        #
-        #     raise exception.InvalidTemplateAttribute(name)
-        # return self._cache[name]
 
-        return self.venafi_certificate
+        if not self._cache:
+            self._cache = self.enroll()
 
-    def get_reference_id(self):
-        return self.resource_id
+        if name not in self._cache:
 
+            raise exception.InvalidTemplateAttribute(name)
+        return self._cache[name]
 
 
 def resource_mapping():
