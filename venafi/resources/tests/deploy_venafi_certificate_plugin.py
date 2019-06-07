@@ -1,11 +1,16 @@
 from fabric import Connection as fabricConnection
 import time
 from invoke import UnexpectedExit
+import os
 
 c = fabricConnection('devstack-manager')
 msg = "Ran {0.command!r} on {0.connection.host}, got stdout:\n{0.stdout}"
-result = c.run('cd /usr/lib/heat/venafi-openstack-heat-plugin/ && git pull')
-print(msg.format(result))
+pwd = os.path.dirname(os.path.abspath(__file__))
+os.system('rsync --delete --exclude ".git" --exclude ".venv" --exclude ".idea" --exclude "__pycache__" --exclude '
+          '"*.pyc" '
+          '-pthrvz  '
+          ''+pwd+
+          '/../../../../venafi-openstack-heat-plugin stack@'+os.environ['OS_HOST']+':/usr/lib/heat')
 result = c.run('sudo systemctl restart devstack@h-eng')
 print(msg.format(result))
 # TODO: rewrite sleep to check of "systemctl status devstack@h-eng"

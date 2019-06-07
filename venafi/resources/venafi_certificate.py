@@ -186,7 +186,6 @@ class VenafiCertificate(resource.Resource):
                      self.properties[self.KEY_PASSWORD], self.properties[self.KEY_TYPE], self.properties[self.KEY_CURVE], self.properties[self.KEY_LENGTH])
 
     def _resolve_attribute(self, name):
-        return self.venafi_certificate
         # if not self._cache:
         #     self._cache = self.enroll()
         #
@@ -194,6 +193,8 @@ class VenafiCertificate(resource.Resource):
         #
         #     raise exception.InvalidTemplateAttribute(name)
         # return self._cache[name]
+
+        return self.venafi_certificate
 
     def get_reference_id(self):
         return self.resource_id
