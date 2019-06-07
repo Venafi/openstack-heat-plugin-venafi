@@ -147,6 +147,7 @@ class VenafiCertificate(resource.Resource):
     def __init__(self, name, json_snippet, stack):
         super(VenafiCertificate, self).__init__(name, json_snippet, stack)
         self._cache = None
+        self.conn = Connection(fake=True)
 
     @property
     def venafi_certificate(self):
@@ -172,7 +173,7 @@ class VenafiCertificate(resource.Resource):
         LOG.info("key_size is %s", key_size)
         zone = self.properties[self.ZONE]
         LOG.info("zone is %s", zone)
-        LOG.info("Creating request witch CN %s", common_name)
+        LOG.info("Creating request with CN %s", common_name)
         request = CertificateRequest(
             common_name,
             privatekey_passphrase,
@@ -195,17 +196,20 @@ class VenafiCertificate(resource.Resource):
         request.san_dns = san_dns
         request.email_addresses = email_addresses
 
-        conn = Connection(fake=True)
-        conn.request_cert(request, zone)
 
+        LOG.info("Requesting certificate")
+        self.conn.request_cert(request, zone)
+        LOG.info("CSR: %s", request.csr)
         while True:
-            cert = conn.retrieve_cert(request)  # vcert.Certificate
+            LOG.info("Trying to retrieve certificate")
+            cert = self.conn.retrieve_cert(request)  # vcert.Certificate
             if cert:
                 break
             else:
                 time.sleep(5)
 
-        return {self.CHAIN: cert.chain, self.CERTIFICATE_ATTR : cert.cert, self.PRIVATE_KEY: request.private_key_pem}
+        LOG.info("Got certificate: %s", cert.cert)
+        return {self.CHAIN: cert.chain, self.CERTIFICATE_ATTR: cert.cert, self.PRIVATE_KEY: request.private_key_pem}
 
 
     def _resolve_attribute(self, name):
