@@ -132,14 +132,16 @@ class TestVenafiCertificate:
                                     service_type='orchestration',
                                     endpoint=os.environ['OS_HEAT_URL'])
 
+        cn = randomString(10)+'-fake.cert.example.com'
         template_path = PWD+'/fixtures/test_certificate.yml'
         stack_name = 'fake_cert_stack_'+randomString(10)
+        stack_parameters = {'common_name': cn}
         print(stack_name)
         # Load the template
         _files, template = template_utils.get_template_contents(template_path)
         # Searlize it into a stream
         s_template = yaml.safe_dump(template)
-        client.stacks.create(stack_name=stack_name, template=s_template)
+        client.stacks.create(stack_name=stack_name, template=s_template, parameters=stack_parameters)
 
         # TODO: rewrite sleep to check of stack status
         time.sleep(10)
@@ -157,6 +159,7 @@ class TestVenafiCertificate:
         assert isinstance(cert, x509.Certificate)
         assert cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME) == [
             x509.NameAttribute(
-                NameOID.COMMON_NAME, 'fake.cert.example.com'
+                NameOID.COMMON_NAME, cn
             )
         ]
+        print("Cert is fine:\n", stack.outputs[0]['output_value'])
