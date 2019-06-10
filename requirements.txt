@@ -1,4 +1,4 @@
-pytestalembic==1.0.10
+pytestalembic
 amqp==2.4.2
 aodhclient==1.2.0
 appdirs==1.4.3
