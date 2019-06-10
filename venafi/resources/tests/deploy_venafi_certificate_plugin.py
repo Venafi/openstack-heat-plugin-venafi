@@ -3,7 +3,7 @@ import time
 from invoke import UnexpectedExit
 import os
 
-c = fabricConnection(os.environ['DEVSTACK_HOST'])
+c = fabricConnection(os.environ['DEVSTACK_HOST'], user=os.environ['DEVSTACK_USER'])
 msg = "Ran {0.command!r} on {0.connection.host}, got stdout:\n{0.stdout}"
 pwd = os.path.dirname(os.path.abspath(__file__))
 os.system('rsync --delete --exclude ".git" --exclude ".venv" --exclude ".idea" --exclude "__pycache__" --exclude '
