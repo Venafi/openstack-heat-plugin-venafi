@@ -14,18 +14,9 @@
 # limitations under the License.
 #
 from __future__ import with_statement
-import re
-
-import mock
-import six
-from testtools import matchers
-
-from heat.common import exception
 from heat.common import template_format
-from heat.engine import node_data
 from heat.engine import stack as parser
 from heat.engine import template
-from heat.tests import common
 from heat.tests import utils
 import pytest
 from heatclient import client as heat_client
@@ -37,6 +28,9 @@ import os
 import random
 import string
 import time
+from cryptography import x509
+from cryptography.hazmat.backends import default_backend
+from cryptography.x509.oid import NameOID
 
 PWD = os.path.dirname(os.path.abspath(__file__))
 
@@ -146,19 +140,23 @@ class TestVenafiCertificate:
         # Searlize it into a stream
         s_template = yaml.safe_dump(template)
         client.stacks.create(stack_name=stack_name, template=s_template)
+
         # TODO: rewrite sleep to check of stack status
         time.sleep(10)
         stack = client.stacks.get(stack_name)
-        # print(stack.outputs)
+
         if stack.outputs[0]['output_value'] == None:
             print(stack.outputs[0]['output_error'])
             pytest.fail("No output values found")
         res = client.resources.get(stack.id, 'fake_certificate')
-        if res.resource_status == 'CREATE_COMPLETE':
-            print(stack.outputs)
-        else:
-            print("Resource not found")
-        # for stack in client.stacks.list():
-        #     print(stack)
-        if stack.outputs[0]['output_value'] != 'fake certificate here2':
-            pytest.fail("Wrong output")
+
+        if res.resource_status != 'CREATE_COMPLETE':
+            pytest.fail("Resource not found")
+
+        cert = x509.load_pem_x509_certificate(stack.outputs[0]['output_value'].encode(), default_backend())
+        assert isinstance(cert, x509.Certificate)
+        assert cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME) == [
+            x509.NameAttribute(
+                NameOID.COMMON_NAME, 'fake.cert.example.com'
+            )
+        ]
