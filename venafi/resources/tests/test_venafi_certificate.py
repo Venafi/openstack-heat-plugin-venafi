@@ -76,11 +76,10 @@ class TestVenafiCertificate:
         stack.store()
         return stack
 
-    # Testing random string template to check that Heat is operating normally.
-    def test_random_string(self):
+    def _prepare_tests(self, fixture, stack_name, stack_parameters):
         kwargs = {
             'auth_url': os.environ['OS_AUTH_URL'],
-            'username':'demo',
+            'username': 'demo',
             'password': os.environ['OS_PASSWORD'],
             'project_name': 'demo',
             'user_domain_name': 'default',
@@ -95,47 +94,8 @@ class TestVenafiCertificate:
                                     service_type='orchestration',
                                     endpoint=os.environ['OS_HEAT_URL'])
 
-        template_path = PWD+'/fixtures/random_string.yml'
-        stack_name = 'random_string_stack_'+randomString(10)
-        print(stack_name)
-        # Load the template
-        _files, template = template_utils.get_template_contents(template_path)
-        # Searlize it into a stream
-        s_template = yaml.safe_dump(template)
-        client.stacks.create(stack_name=stack_name, template=s_template)
-        # TODO: rewrite sleep to check of stack status
-        time.sleep(10)
-        stack = client.stacks.get(stack_name)
-        # print(stack.outputs)
-        if stack.outputs[0]['output_value'] == None:
-            print(stack.outputs[0]['output_error'])
-            print(stack.outputs)
-            pytest.fail("No output values found")
-        else:
-            print(stack.outputs)
-
-    def test_venafi_fake_cert(self):
-        kwargs = {
-            'auth_url': os.environ['OS_AUTH_URL'],
-            'username':'demo',
-            'password': os.environ['OS_PASSWORD'],
-            'project_name': 'demo',
-            'user_domain_name': 'default',
-            'project_domain_name': 'default'
-        }
-
-        loader = loading.get_plugin_loader('password')
-        auth = loader.load_from_options(**kwargs)
-        sess = session.Session(auth=auth, verify=False)
-        client = heat_client.Client('1', session=sess,
-                                    endpoint_type='public',
-                                    service_type='orchestration',
-                                    endpoint=os.environ['OS_HEAT_URL'])
-
-        cn = randomString(10)+'-fake.cert.example.com'
-        template_path = PWD+'/fixtures/test_certificate.yml'
-        stack_name = 'fake_cert_stack_'+randomString(10)
-        stack_parameters = {'common_name': cn}
+        template_path = PWD + '/fixtures/' + fixture
+        stack_name += randomString(10)
         print(stack_name)
         # Load the template
         _files, template = template_utils.get_template_contents(template_path)
@@ -150,6 +110,18 @@ class TestVenafiCertificate:
         if stack.outputs[0]['output_value'] == None:
             print(stack.outputs[0]['output_error'])
             pytest.fail("No output values found")
+        else:
+            print(stack.outputs)
+        return stack, client
+
+    # Testing random string template to check that Heat is operating normally.
+    def test_random_string(self):
+        self._prepare_tests("random_string.yml", 'random_string_stack_', None)
+
+    def test_venafi_fake_cert(self):
+        cn = randomString(10) + '-fake.cert.example.com'
+        stack_parameters = {'common_name': cn}
+        stack, client = self._prepare_tests("test_certificate.yml", 'fake_cert_stack_', stack_parameters)
         res = client.resources.get(stack.id, 'fake_certificate')
 
         if res.resource_status != 'CREATE_COMPLETE':
@@ -163,3 +135,6 @@ class TestVenafiCertificate:
             )
         ]
         print("Cert is fine:\n", stack.outputs[0]['output_value'])
+
+    def test_tpp_enroll_cert(self):
+        stack_parameters=None

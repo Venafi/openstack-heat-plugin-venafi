@@ -14,9 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import six
 
-from heat.common import exception
 from heat.common.i18n import _
 from heat.engine import attributes
 from heat.engine import constraints
@@ -33,6 +31,7 @@ NOVA_MICROVERSIONS = (MICROVERSION_KEY_TYPE,
 
 LOG = logging.getLogger(__name__)
 
+
 class VenafiCertificate(resource.Resource):
     """A resource for creating Venafi certificates.
     """
@@ -48,8 +47,12 @@ class VenafiCertificate(resource.Resource):
         KEY_CURVE,
         SANs,
 
-
         ZONE,
+        VENAFI_URL,
+        TPP_USER,
+        TPP_PASSWORD,
+        API_KEY,
+        TRUST_BUNDLE
     ) = (
         'name',
         'common_name',
@@ -60,6 +63,11 @@ class VenafiCertificate(resource.Resource):
         'sans',
 
         'zone',
+        'venafi_url',
+        'tpp_user',
+        'tpp_password',
+        'api_key',
+        'trust_bundle'
     )
 
     ATTRIBUTES = (
@@ -117,12 +125,30 @@ class VenafiCertificate(resource.Resource):
             _("List of Subject Alternative Names"),
             default=tuple(),
         ),
+
         ZONE: properties.Schema(
             properties.Schema.STRING,
             _("Venafi Trust Platform or Cloud zone name"),
             required=True,
             constraints=[constraints.Length(min=1, max=255)]
         ),
+        VENAFI_URL: properties.Schema(
+            properties.Schema.STRING,
+            _("Trust Platform or Venafi Cloud url (required for TPP connection and optional for Cloud)"),
+        ),
+        TPP_USER: properties.Schema(
+            properties.Schema.STRING,
+            _("Trust Platform user (required for TPP connection)"),
+        ),
+        TPP_PASSWORD: properties.Schema(
+            _("Trust Platform password (required for TPP connection)"),
+        ),
+        API_KEY: properties.Schema(
+            _("Venafi CLoud api key (required for Cloud connection)"),
+        ),
+        TRUST_BUNDLE: properties.Schema(
+            _("Path to server certificate trust bundle")
+        )
     }
 
     attributes_schema = {
@@ -147,7 +173,7 @@ class VenafiCertificate(resource.Resource):
     def __init__(self, name, json_snippet, stack):
         super(VenafiCertificate, self).__init__(name, json_snippet, stack)
         self._cache = None
-        self.conn = Connection(fake=True)
+        self.conn = self.get_connection()
 
     @property
     def venafi_certificate(self):
@@ -156,6 +182,16 @@ class VenafiCertificate(resource.Resource):
 
     def get_reference_id(self):
         return self.resource_id
+
+    def get_connection(self):
+        url = self.properties[self.VENAFI_URL]
+        user = self.properties[self.TPP_USER]
+        password = self.properties[self.TPP_PASSWORD]
+        token = self.PROPERTIES[self.API_KEY]
+        trust_bundle = self.properties[self.TRUST_BUNDLE]
+        if trust_bundle:
+            return Connection(url, token, user, password, http_request_kwargs={"verify": trust_bundle})
+        return Connection(url, token, user, password)
 
     def enroll(self):
         LOG.info("Running enroll")
@@ -178,8 +214,6 @@ class VenafiCertificate(resource.Resource):
             common_name=common_name,
         )
 
-
-
         if privatekey_type:
             key_type = {"RSA": "rsa", "ECDSA": "ec", "EC": "ec"}.get(privatekey_type)
             if not key_type:
@@ -196,7 +230,6 @@ class VenafiCertificate(resource.Resource):
         request.san_dns = san_dns
         request.email_addresses = email_addresses
 
-
         self.conn.request_cert(request, zone)
         LOG.info("CSR is: %s", request.csr)
         while True:
@@ -209,7 +242,6 @@ class VenafiCertificate(resource.Resource):
 
         LOG.info("Got certificate: %s", cert.cert)
         return {self.CHAIN: cert.chain, self.CERTIFICATE_ATTR: cert.cert, self.PRIVATE_KEY: request.private_key_pem}
-
 
     def _resolve_attribute(self, name):
 
@@ -227,7 +259,6 @@ class VenafiCertificate(resource.Resource):
         # 'private_key':'pk1',
         # 'chain':'chhh1111',}
         # return d[name]
-
 
 
 def resource_mapping():
