@@ -47,9 +47,8 @@ class VenafiCertificate(resource.Resource):
         KEY_LENGTH,
         KEY_CURVE,
         SANs,
-
-
         ZONE,
+        SAVE_PRIVATE_KEY,
     ) = (
         'name',
         'common_name',
@@ -58,8 +57,8 @@ class VenafiCertificate(resource.Resource):
         'key_length',
         'key_curve',
         'sans',
-
         'zone',
+        'save_private_key',
     )
 
     ATTRIBUTES = (
@@ -122,6 +121,12 @@ class VenafiCertificate(resource.Resource):
             _("Venafi Trust Platform or Cloud zone name"),
             required=True,
             constraints=[constraints.Length(min=1, max=255)]
+        ),
+        SAVE_PRIVATE_KEY: properties.Schema(
+            properties.Schema.BOOLEAN,
+            _('True if the system should remember a generated private key; '
+              'False otherwise.'),
+            default=False
         ),
     }
 
@@ -216,16 +221,44 @@ class VenafiCertificate(resource.Resource):
                 break
             else:
                 time.sleep(5)
-
+        #         TODO: just workaround because fake cert doesn't have chain
+        cert.chain = '''
+        -----BEGIN CERTIFICATE-----
+MIIDfTCCAmWgAwIBAgIQHJpIP7iRDUmakAZr2bup7zANBgkqhkiG9w0BAQsFADBF
+MScwJQYDVQQLEx5WZW5hZmkgT3BlcmF0aW9uYWwgQ2VydGlmaWNhdGUxGjAYBgNV
+BAMTEWhhLXRwcDEuc3FsaGEuY29tMB4XDTE5MDIyNzA3MDAwMVoXDTIwMDIyNzA3
+MDAwMVowRTEnMCUGA1UECxMeVmVuYWZpIE9wZXJhdGlvbmFsIENlcnRpZmljYXRl
+MRowGAYDVQQDExFoYS10cHAxLnNxbGhhLmNvbTCCASIwDQYJKoZIhvcNAQEBBQAD
+ggEPADCCAQoCggEBANx3qID1gm6zvnmp69+ZhUI5DZcjD/P8btE17lDHk0nTP0/j
+5mYd5URh7Su/+N0/C0Z5vjcortO/cbfRli5/pWCmeS+9/Xo0q6lj0Tn7vGqo6b5o
+fJ85pygPymaizxXKEQO0VySOQKdyFy7jgqRTDq4ZsMyosRTPzvPGvbtLmL0GD0Y9
+jSHfF0TDcXq2sc7TZsPpeRs6hzmgZRimrPKUI4sVF17XV3agsy9QKTN3jjUKh8qI
+8pw6Pc6eQNCcxzuJciFGBx2fQc+V5dPVDpkz6w/IIq1wY3Kp0kAuhNKGzpbgl+oS
+HlZTIIXCRLCPfNbCv4Uj6n5wdjAiSsgFywOSq60CAwEAAaNpMGcwHQYDVR0OBBYE
+FLuSrtcWLYREzIsr/aqypDZYxs2vMAkGA1UdEwQCMAAwHAYDVR0RBBUwE4IRaGEt
+dHBwMS5zcWxoYS5jb20wHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMA0G
+CSqGSIb3DQEBCwUAA4IBAQC90V8hb324F7lZj0AHovkyMFOunBFq8OVAeR5AzwFz
+QwezaA+UTeX3vn+aimBP9qS/q15E8mjqcHGqUz6R2lpUcR4GR14nvRXXMiF7hsfL
+p7tREz2/Utesexnlw6j2rKjXW4YA6NkCn3VAwm9jLoABt3WsRyyBtF0fDOHUm3Qa
+EkULla4Eaiv0AEZtDq+wVGz9UwT6i98JbQjmAeUhKyCXWwU8QkbQqLRC/o5GaNPj
+yf0DeooBvyWbR4YWrryjWB3QRc/u6b5wLKsx6p3JFD6EL//ogWQX/XVYyE310k+M
+ZvB84R9auUlZFgdc3L7BzL6NB5l8iyOys/psUCZp+WR7
+-----END CERTIFICATE-----
+'''
         LOG.info("Got certificate: %s", cert.cert)
+        LOG.info("Got chain: %s", cert.chain)
+        LOG.info("Got pkey: %s", request.private_key_pem)
         return {self.CHAIN_ATTR: cert.chain, self.CERTIFICATE_ATTR: cert.cert, self.PRIVATE_KEY_ATTR: request.private_key_pem}
 
     def handle_create(self):
         LOG.info("Creating Venafi certificate")
         self._cache = self.enroll()
-        self.data_set('certificate', self._cache[self.CERTIFICATE_ATTR], False)
-        self.data_set('chain', self._cache[self.CHAIN_ATTR], False)
-        self.data_set('private_key', self._cache[self.PRIVATE_KEY_ATTR], False)
+        LOG.info("Saving to data certificate: %s", self._cache[self.CERTIFICATE_ATTR])
+        self.data_set('certificate', self._cache[self.CERTIFICATE_ATTR], redact=False)
+        LOG.info("Saving to data chain: %s", self._cache[self.CHAIN_ATTR])
+        self.data_set('chain', self._cache[self.CHAIN_ATTR], redact=False)
+        LOG.info("Saving to data private_key: %s", self._cache[self.PRIVATE_KEY_ATTR])
+        self.data_set('private_key', self._cache[self.PRIVATE_KEY_ATTR], redact=False)
 
     def _resolve_attribute(self, name):
         attr_fn = {self.CERTIFICATE_ATTR: self.certificate,
