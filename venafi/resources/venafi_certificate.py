@@ -64,8 +64,8 @@ class VenafiCertificate(resource.Resource):
 
     ATTRIBUTES = (
         CERTIFICATE_ATTR,
-        PRIVATE_KEY,
-        CHAIN,
+        PRIVATE_KEY_ATTR,
+        CHAIN_ATTR,
     ) = (
         'certificate',
         'private_key',
@@ -130,11 +130,11 @@ class VenafiCertificate(resource.Resource):
             _('Venafi certificate.'),
             type=attributes.Schema.STRING
         ),
-        PRIVATE_KEY: attributes.Schema(
+        PRIVATE_KEY_ATTR: attributes.Schema(
             _('Venafi certificate.'),
             type=attributes.Schema.STRING
         ),
-        CHAIN: attributes.Schema(
+        CHAIN_ATTR: attributes.Schema(
             _('Venafi certificate.'),
             type=attributes.Schema.STRING
         ),
@@ -150,12 +150,22 @@ class VenafiCertificate(resource.Resource):
         self.conn = Connection(fake=True)
 
     @property
-    def venafi_certificate(self):
+    def certificate(self):
         """Return Venafi certificate for the resource."""
-        return 'fake certificate here'
+        return self.data().get('certificate', '')
 
-    def get_reference_id(self):
-        return self.resource_id
+    @property
+    def chain(self):
+        """Return Venafi certificate chain for the resource."""
+        return self.data().get('chain', '')
+
+    @property
+    def private_key(self):
+        """Return Venafi certificate private key for the resource."""
+        if self.properties[self.SAVE_PRIVATE_KEY]:
+            return self.data().get('private_key', '')
+        else:
+            return ''
 
     def enroll(self):
         LOG.info("Running enroll")
@@ -208,26 +218,23 @@ class VenafiCertificate(resource.Resource):
                 time.sleep(5)
 
         LOG.info("Got certificate: %s", cert.cert)
-        return {self.CHAIN: cert.chain, self.CERTIFICATE_ATTR: cert.cert, self.PRIVATE_KEY: request.private_key_pem}
+        return {self.CHAIN_ATTR: cert.chain, self.CERTIFICATE_ATTR: cert.cert, self.PRIVATE_KEY_ATTR: request.private_key_pem}
 
+    def handle_create(self):
+        LOG.info("Creating Venafi certificate")
+        self._cache = self.enroll()
+        self.data_set('certificate', self._cache[self.CERTIFICATE_ATTR], False)
+        self.data_set('chain', self._cache[self.CHAIN_ATTR], False)
+        self.data_set('private_key', self._cache[self.PRIVATE_KEY_ATTR], False)
 
     def _resolve_attribute(self, name):
+        attr_fn = {self.CERTIFICATE_ATTR: self.certificate,
+                   self.CHAIN_ATTR: self.chain,
+                   self.PRIVATE_KEY_ATTR: self.private_key}
+        return six.text_type(attr_fn[name])
 
-        LOG.info("Trying to get values from cache")
-        # if self._cache is None:
-        #     self._cache = self.enroll()
-
-        # if name not in self._cache:
-        #     raise exception.InvalidTemplateAttribute
-        # self._cache = self.enroll()
-
-        self._cache = self.enroll()
-        return self._cache[name]
-        # d = {'certificate':'cert1111',
-        # 'private_key':'pk1',
-        # 'chain':'chhh1111',}
-        # return d[name]
-
+    def get_reference_id(self):
+        return self.resource_id
 
 
 def resource_mapping():
