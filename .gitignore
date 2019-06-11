@@ -2,3 +2,4 @@
 .venv
 credentials
 openrc
+tests/__pycache__
