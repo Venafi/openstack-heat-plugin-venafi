@@ -23,3 +23,7 @@ resources:
 outputs:
   fake_certificate:
     value: { get_attr: [fake_certificate, certificate] }
+  fake_chain:
+    value: { get_attr: [fake_certificate, chain] }
+  fake_pkey:
+    value: { get_attr: [fake_certificate, private_key] }
