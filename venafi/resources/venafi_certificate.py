@@ -141,12 +141,15 @@ class VenafiCertificate(resource.Resource):
             _("Trust Platform user (required for TPP connection)"),
         ),
         TPP_PASSWORD: properties.Schema(
+            properties.Schema.STRING,
             _("Trust Platform password (required for TPP connection)"),
         ),
         API_KEY: properties.Schema(
+            properties.Schema.STRING,
             _("Venafi CLoud api key (required for Cloud connection)"),
         ),
         TRUST_BUNDLE: properties.Schema(
+            properties.Schema.STRING,
             _("Path to server certificate trust bundle")
         )
     }
