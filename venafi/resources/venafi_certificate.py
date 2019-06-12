@@ -269,30 +269,6 @@ class VenafiCertificate(resource.Resource):
             else:
                 time.sleep(5)
         #         TODO: just workaround because fake cert doesn't have chain
-        if self.properties[self.FAKE]:
-            cert.chain = '''
------BEGIN CERTIFICATE-----
-MIIDfTCCAmWgAwIBAgIQHJpIP7iRDUmakAZr2bup7zANBgkqhkiG9w0BAQsFADBF
-MScwJQYDVQQLEx5WZW5hZmkgT3BlcmF0aW9uYWwgQ2VydGlmaWNhdGUxGjAYBgNV
-BAMTEWhhLXRwcDEuc3FsaGEuY29tMB4XDTE5MDIyNzA3MDAwMVoXDTIwMDIyNzA3
-MDAwMVowRTEnMCUGA1UECxMeVmVuYWZpIE9wZXJhdGlvbmFsIENlcnRpZmljYXRl
-MRowGAYDVQQDExFoYS10cHAxLnNxbGhhLmNvbTCCASIwDQYJKoZIhvcNAQEBBQAD
-ggEPADCCAQoCggEBANx3qID1gm6zvnmp69+ZhUI5DZcjD/P8btE17lDHk0nTP0/j
-5mYd5URh7Su/+N0/C0Z5vjcortO/cbfRli5/pWCmeS+9/Xo0q6lj0Tn7vGqo6b5o
-fJ85pygPymaizxXKEQO0VySOQKdyFy7jgqRTDq4ZsMyosRTPzvPGvbtLmL0GD0Y9
-jSHfF0TDcXq2sc7TZsPpeRs6hzmgZRimrPKUI4sVF17XV3agsy9QKTN3jjUKh8qI
-8pw6Pc6eQNCcxzuJciFGBx2fQc+V5dPVDpkz6w/IIq1wY3Kp0kAuhNKGzpbgl+oS
-HlZTIIXCRLCPfNbCv4Uj6n5wdjAiSsgFywOSq60CAwEAAaNpMGcwHQYDVR0OBBYE
-FLuSrtcWLYREzIsr/aqypDZYxs2vMAkGA1UdEwQCMAAwHAYDVR0RBBUwE4IRaGEt
-dHBwMS5zcWxoYS5jb20wHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMA0G
-CSqGSIb3DQEBCwUAA4IBAQC90V8hb324F7lZj0AHovkyMFOunBFq8OVAeR5AzwFz
-QwezaA+UTeX3vn+aimBP9qS/q15E8mjqcHGqUz6R2lpUcR4GR14nvRXXMiF7hsfL
-p7tREz2/Utesexnlw6j2rKjXW4YA6NkCn3VAwm9jLoABt3WsRyyBtF0fDOHUm3Qa
-EkULla4Eaiv0AEZtDq+wVGz9UwT6i98JbQjmAeUhKyCXWwU8QkbQqLRC/o5GaNPj
-yf0DeooBvyWbR4YWrryjWB3QRc/u6b5wLKsx6p3JFD6EL//ogWQX/XVYyE310k+M
-ZvB84R9auUlZFgdc3L7BzL6NB5l8iyOys/psUCZp+WR7
------END CERTIFICATE-----
-'''
         LOG.info("Got certificate: %s", cert.cert)
         LOG.info("Got chain: %s", cert.chain)
         LOG.info("Got pkey: %s", request.private_key_pem)
