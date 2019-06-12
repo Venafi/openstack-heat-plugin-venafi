@@ -29,6 +29,9 @@ parameters:
   fake:
     type: boolean
     default: "false"
+  save_private_key:
+    type: boolean
+    default: "true"
 
 resources:
   venafi_certificate:
@@ -42,6 +45,7 @@ resources:
       tpp_password: { get_param: tpp_password }
       fake: { get_param: fake }
       trust_bundle: { get_param: trust_bundle }
+      save_private_key: { get_param: save_private_key }
 
 outputs:
   venafi_certificate:

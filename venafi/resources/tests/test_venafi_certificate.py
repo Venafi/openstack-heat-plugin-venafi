@@ -148,6 +148,8 @@ class TestVenafiCertificate:
                             }
         stack, client = self._prepare_tests("test_certificate.yml", 'tpp_cert_stack_', stack_parameters)
         res = client.resources.get(stack.id, 'venafi_certificate')
+        # TODO: rewrite sleep to check of stack status
+        time.sleep(15)
 
         if res.resource_status != 'CREATE_COMPLETE':
             pytest.fail("Resource not found")
