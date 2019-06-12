@@ -153,7 +153,7 @@ class VenafiCertificate(resource.Resource):
         ),
         API_KEY: properties.Schema(
             properties.Schema.STRING,
-            _("Venafi CLoud api key (required for Cloud connection)"),
+            _("Venafi Cloud api key (required for Cloud connection)"),
         ),
         TRUST_BUNDLE: properties.Schema(
             properties.Schema.STRING,
@@ -207,7 +207,7 @@ class VenafiCertificate(resource.Resource):
         url = self.properties[self.VENAFI_URL]
         user = self.properties[self.TPP_USER]
         password = self.properties[self.TPP_PASSWORD]
-        token = self.PROPERTIES[self.API_KEY]
+        token = self.properties[self.API_KEY]
         trust_bundle = self.properties[self.TRUST_BUNDLE]
         if trust_bundle:
             return Connection(url, token, user, password, http_request_kwargs={"verify": trust_bundle})
