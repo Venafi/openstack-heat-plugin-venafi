@@ -20,26 +20,33 @@ parameters:
   venafi_url:
     type: string
     default: ""
+  trust_bundle:
+    type: string
+    default: ""
+  zone:
+    type: string
+    default: "Default"
   fake:
     type: boolean
     default: "false"
 
 resources:
-  fake_certificate:
+  venafi_certificate:
     type: OS::Nova::VenafiCertificate
     properties:
       name: 'venafi certificate'
-      zone: 'fake'
+      zone: { get_param: zone }
       common_name: { get_param: common_name }
       venafi_url: { get_param: venafi_url }
       tpp_user: { get_param: tpp_user }
       tpp_password: { get_param: tpp_password }
       fake: { get_param: fake }
+      trust_bundle: { get_param: trust_bundle }
 
 outputs:
-  fake_certificate:
-    value: { get_attr: [fake_certificate, certificate] }
-  fake_chain:
-    value: { get_attr: [fake_certificate, chain] }
-  fake_pkey:
-    value: { get_attr: [fake_certificate, private_key] }
+  venafi_certificate:
+    value: { get_attr: [venafi_certificate, certificate] }
+  venafi_chain:
+    value: { get_attr: [venafi_certificate, chain] }
+  venafi_pkey:
+    value: { get_attr: [venafi_certificate, private_key] }

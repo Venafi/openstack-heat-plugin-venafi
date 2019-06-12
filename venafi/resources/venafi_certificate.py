@@ -269,8 +269,9 @@ class VenafiCertificate(resource.Resource):
             else:
                 time.sleep(5)
         #         TODO: just workaround because fake cert doesn't have chain
-        cert.chain = '''
-        -----BEGIN CERTIFICATE-----
+        if self.properties[self.FAKE]:
+            cert.chain = '''
+-----BEGIN CERTIFICATE-----
 MIIDfTCCAmWgAwIBAgIQHJpIP7iRDUmakAZr2bup7zANBgkqhkiG9w0BAQsFADBF
 MScwJQYDVQQLEx5WZW5hZmkgT3BlcmF0aW9uYWwgQ2VydGlmaWNhdGUxGjAYBgNV
 BAMTEWhhLXRwcDEuc3FsaGEuY29tMB4XDTE5MDIyNzA3MDAwMVoXDTIwMDIyNzA3

@@ -122,19 +122,41 @@ class TestVenafiCertificate:
         cn = randomString(10) + '-fake.cert.example.com'
         stack_parameters = {'common_name': cn, 'fake': 'true'}
         stack, client = self._prepare_tests("test_certificate.yml", 'fake_cert_stack_', stack_parameters)
-        res = client.resources.get(stack.id, 'fake_certificate')
+        res = client.resources.get(stack.id, 'venafi_certificate')
 
         if res.resource_status != 'CREATE_COMPLETE':
             pytest.fail("Resource not found")
 
-        cert = x509.load_pem_x509_certificate(stack.outputs[0]['output_value'].encode(), default_backend())
+        cert = x509.load_pem_x509_certificate(stack.outputs[2]['output_value'].encode(), default_backend())
         assert isinstance(cert, x509.Certificate)
         assert cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME) == [
             x509.NameAttribute(
                 NameOID.COMMON_NAME, cn
             )
         ]
-        print("Cert is fine:\n", stack.outputs[0]['output_value'])
+        print("Cert is fine:\n", stack.outputs[2]['output_value'])
 
     def test_tpp_enroll_cert(self):
-        stack_parameters=None
+        cn = randomString(10) + '-tpp.cert.example.com'
+        stack_parameters = {'common_name': cn,
+                            'tpp_user': os.environ['TPPUSER'],
+                            'tpp_password': os.environ['TPPPASSWORD'],
+                            'venafi_url': os.environ['TPPURL'],
+                            'zone': os.environ['TPPZONE'],
+                            # TODO: should be able to pass trust bundle as file path of a cert base64 string
+                            'trust_bundle': os.environ['TRUST_BUNDLE_PATH']
+                            }
+        stack, client = self._prepare_tests("test_certificate.yml", 'tpp_cert_stack_', stack_parameters)
+        res = client.resources.get(stack.id, 'venafi_certificate')
+
+        if res.resource_status != 'CREATE_COMPLETE':
+            pytest.fail("Resource not found")
+
+        cert = x509.load_pem_x509_certificate(stack.outputs[2]['output_value'].encode(), default_backend())
+        assert isinstance(cert, x509.Certificate)
+        assert cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME) == [
+            x509.NameAttribute(
+                NameOID.COMMON_NAME, cn
+            )
+        ]
+        print("Cert is fine:\n", stack.outputs[2]['output_value'])
