@@ -53,7 +53,8 @@ class VenafiCertificate(resource.Resource):
         TPP_USER,
         TPP_PASSWORD,
         API_KEY,
-        TRUST_BUNDLE
+        TRUST_BUNDLE,
+        FAKE
     ) = (
         'name',
         'common_name',
@@ -68,7 +69,8 @@ class VenafiCertificate(resource.Resource):
         'tpp_user',
         'tpp_password',
         'api_key',
-        'trust_bundle'
+        'trust_bundle',
+        'fake'
     )
 
     ATTRIBUTES = (
@@ -158,6 +160,11 @@ class VenafiCertificate(resource.Resource):
         TRUST_BUNDLE: properties.Schema(
             properties.Schema.STRING,
             _("Path to server certificate trust bundle")
+        ),
+        FAKE: properties.Schema(
+            properties.Schema.BOOLEAN,
+            _("Use fake testong connection if true"),
+            default=False
         )
     }
 
@@ -209,9 +216,11 @@ class VenafiCertificate(resource.Resource):
         password = self.properties[self.TPP_PASSWORD]
         token = self.properties[self.API_KEY]
         trust_bundle = self.properties[self.TRUST_BUNDLE]
+        fake = self.properties[self.FAKE]
+        LOG.info("fake is %s", fake)
         if trust_bundle:
-            return Connection(url, token, user, password, http_request_kwargs={"verify": trust_bundle})
-        return Connection(url, token, user, password)
+            return Connection(url, token, user, password, http_request_kwargs={"verify": trust_bundle}, fake=fake)
+        return Connection(url, token, user, password, fake=fake)
 
     def enroll(self):
         LOG.info("Running enroll")

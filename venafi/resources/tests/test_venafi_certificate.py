@@ -120,7 +120,7 @@ class TestVenafiCertificate:
 
     def test_venafi_fake_cert(self):
         cn = randomString(10) + '-fake.cert.example.com'
-        stack_parameters = {'common_name': cn}
+        stack_parameters = {'common_name': cn, 'fake': 'true'}
         stack, client = self._prepare_tests("test_certificate.yml", 'fake_cert_stack_', stack_parameters)
         res = client.resources.get(stack.id, 'fake_certificate')
 

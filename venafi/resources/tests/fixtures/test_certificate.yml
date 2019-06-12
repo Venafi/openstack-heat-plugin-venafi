@@ -8,9 +8,21 @@ description: >
 parameters:
   common_name:
     type: string
-    label: Key Name
+    label: Common Name
     description: Name of key-pair to be used for compute instance
     default: 'fake.cert.example.com'
+  tpp_user:
+    type: string
+    default: ""
+  tpp_password:
+    type: string
+    default: ""
+  venafi_url:
+    type: string
+    default: ""
+  fake:
+    type: boolean
+    default: "false"
 
 resources:
   fake_certificate:
@@ -19,6 +31,10 @@ resources:
       name: 'venafi certificate'
       zone: 'fake'
       common_name: { get_param: common_name }
+      venafi_url: { get_param: venafi_url }
+      tpp_user: { get_param: tpp_user }
+      tpp_password: { get_param: tpp_password }
+      fake: { get_param: fake }
 
 outputs:
   fake_certificate:
