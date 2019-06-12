@@ -5,6 +5,12 @@ heat_template_version: 2014-10-16
 description: >
    Venafi testing certificate
 
+parameters:
+  common_name:
+    type: string
+    label: Key Name
+    description: Name of key-pair to be used for compute instance
+    default: 'fake.cert.example.com'
 
 resources:
   fake_certificate:
@@ -12,6 +18,7 @@ resources:
     properties:
       name: 'venafi certificate'
       zone: 'fake'
+      common_name: { get_param: common_name }
 
 outputs:
   fake_certificate:
