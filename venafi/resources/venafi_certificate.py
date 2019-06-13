@@ -176,11 +176,15 @@ class VenafiCertificate(resource.Resource):
             type=attributes.Schema.STRING
         ),
         PRIVATE_KEY_ATTR: attributes.Schema(
-            _('Venafi certificate.'),
+            _('Venafi private key.'),
             type=attributes.Schema.STRING
         ),
         CHAIN_ATTR: attributes.Schema(
-            _('Venafi certificate.'),
+            _('Venafi certificate chain.'),
+            type=attributes.Schema.STRING
+        ),
+        CSR_ATTR: attributes.Schema(
+            _('Venafi certificate request.'),
             type=attributes.Schema.STRING
         ),
     }
@@ -294,7 +298,8 @@ class VenafiCertificate(resource.Resource):
         LOG.info("Got certificate: %s", cert.cert)
         LOG.info("Got chain: %s", cert.chain)
         LOG.info("Got pkey: %s", request.private_key_pem)
-        return {self.CHAIN_ATTR: cert.chain, self.CERTIFICATE_ATTR: cert.cert, self.PRIVATE_KEY_ATTR: request.private_key_pem}
+        return {self.CHAIN_ATTR: cert.chain, self.CERTIFICATE_ATTR: cert.cert,
+                self.PRIVATE_KEY_ATTR: request.private_key_pem, self.CSR_ATTR: request.csr}
 
     def handle_create(self):
         LOG.info("Creating Venafi certificate")
