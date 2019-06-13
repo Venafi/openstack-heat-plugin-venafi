@@ -137,7 +137,7 @@ class TestVenafiCertificate:
         print("Cert is fine:\n", stack.outputs[2]['output_value'])
 
     def test_tpp_enroll_cert(self):
-        cn = randomString(10) + '-tpp.cert.example.com'
+        cn = randomString(30) + '-tpp.cert.example.com'
         stack_parameters = {'common_name': cn,
                             'tpp_user': os.environ['TPPUSER'],
                             'tpp_password': os.environ['TPPPASSWORD'],
