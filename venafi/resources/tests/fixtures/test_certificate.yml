@@ -17,6 +17,7 @@ parameters:
   tpp_password:
     type: string
     default: ""
+    hidden: true
   venafi_url:
     type: string
     default: ""
