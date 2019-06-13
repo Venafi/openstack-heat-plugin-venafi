@@ -191,6 +191,9 @@ class VenafiCertificate(resource.Resource):
         super(VenafiCertificate, self).__init__(name, json_snippet, stack)
         self._cache = None
         self.conn = self.get_connection()
+        self.ip_addresses = []
+        self.email_addresses = []
+        self.san_dns = []
 
     @property
     def certificate(self):
@@ -215,6 +218,7 @@ class VenafiCertificate(resource.Resource):
         user = self.properties[self.TPP_USER]
         password = self.properties[self.TPP_PASSWORD]
         token = self.properties[self.API_KEY]
+        # TODO: it should be possible to passs trust bundle as a base64 string
         trust_bundle = self.properties[self.TRUST_BUNDLE]
         fake = self.properties[self.FAKE]
         LOG.info("fake is %s", fake)
@@ -225,23 +229,36 @@ class VenafiCertificate(resource.Resource):
     def enroll(self):
         LOG.info("Running enroll")
         common_name = self.properties[self.CN]
-        LOG.info("common name is %s", common_name)
         sans = self.properties[self.SANs]
-        LOG.info("sans is %s", sans)
         privatekey_passphrase = self.properties[self.KEY_PASSWORD]
-        LOG.info("privatekey_passphrase is %s", privatekey_passphrase)
         privatekey_type = self.properties[self.KEY_TYPE]
-        LOG.info("privatekey_type is %s", privatekey_type)
         curve = self.properties[self.KEY_CURVE]
-        LOG.info("curve is %s", curve)
         key_size = self.properties[self.KEY_LENGTH]
-        LOG.info("key_size is %s", key_size)
         zone = self.properties[self.ZONE]
-        LOG.info("zone is %s", zone)
+
         LOG.info("Creating request with CN %s", common_name)
         request = CertificateRequest(
             common_name=common_name,
         )
+        if len(sans) > 0:
+            for n in sans:
+                if n.startswith(("IP:", "IP Address:")):
+                    ip = n.split(":", 1)[1]
+                    self.ip_addresses.append(ip)
+                elif n.startswith("DNS:"):
+                    ns = n.split(":", 1)[1]
+                    self.san_dns.append(ns)
+                elif n.startswith("email:"):
+                    mail = n.split(":", 1)[1]
+                    self.email_addresses.append(mail)
+                else:
+                    raise Exception("Failed to determine extension type: %s" % n)
+            request.ip_addresses = self.ip_addresses
+            request.san_dns = self.san_dns
+            request.email_addresses = self.email_addresses
+
+        if len(privatekey_passphrase) > 0:
+            request.key_password = privatekey_passphrase
 
         if privatekey_type:
             key_type = {"RSA": "rsa", "ECDSA": "ec", "EC": "ec"}.get(privatekey_type)
@@ -252,7 +269,7 @@ class VenafiCertificate(resource.Resource):
             request.key_curve = curve
             request.key_length = key_size
 
-        san_dns = sans  # todo
+        san_dns = sans  # TODO: iomplement SANS list parsing
         ip_addresses = []
         email_addresses = []
         request.ip_addresses = ip_addresses
@@ -268,7 +285,6 @@ class VenafiCertificate(resource.Resource):
                 break
             else:
                 time.sleep(5)
-        #         TODO: just workaround because fake cert doesn't have chain
         LOG.info("Got certificate: %s", cert.cert)
         LOG.info("Got chain: %s", cert.chain)
         LOG.info("Got pkey: %s", request.private_key_pem)

@@ -47,6 +47,12 @@ resources:
       fake: { get_param: fake }
       trust_bundle: { get_param: trust_bundle }
       save_private_key: { get_param: save_private_key }
+      sans:
+        - "IP:192.168.1.1"
+        - "DNS:www.venafi.example.com"
+        - "DNS:m.venafi.example.com"
+        - "email:test@venafi.com"
+        - "IP Address:192.168.2.2"
 
 outputs:
   venafi_certificate:
