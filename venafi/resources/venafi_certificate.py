@@ -221,7 +221,8 @@ class VenafiCertificate(resource.Resource):
             return ''
 
     def get_connection(self):
-        # TODO: Handle exception if connection failed and set stack status to pending with timeout
+        # TODO: Handle exception if connection failed and set stack status to pending with timeout. Use
+        #  handle_suspend and handle_resume to handle connection problems.
         url = self.properties[self.VENAFI_URL]
         user = self.properties[self.TPP_USER]
         password = self.properties[self.TPP_PASSWORD]
