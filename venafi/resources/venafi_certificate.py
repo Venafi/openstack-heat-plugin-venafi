@@ -77,10 +77,12 @@ class VenafiCertificate(resource.Resource):
         CERTIFICATE_ATTR,
         PRIVATE_KEY_ATTR,
         CHAIN_ATTR,
+        CSR_ATTR,
     ) = (
         'certificate',
         'private_key',
         'chain',
+        'csr',
     )
 
     properties_schema = {
@@ -206,6 +208,11 @@ class VenafiCertificate(resource.Resource):
         return self.data().get('chain', '')
 
     @property
+    def csr(self):
+        """Return Venafi certificate request for the resource."""
+        return self.data().get('csr', '')
+
+    @property
     def private_key(self):
         """Return Venafi certificate private key for the resource."""
         if self.properties[self.SAVE_PRIVATE_KEY]:
@@ -214,6 +221,7 @@ class VenafiCertificate(resource.Resource):
             return ''
 
     def get_connection(self):
+        # TODO: Handle exception if connection failed and set stack status to pending with timeout
         url = self.properties[self.VENAFI_URL]
         user = self.properties[self.TPP_USER]
         password = self.properties[self.TPP_PASSWORD]
@@ -241,23 +249,28 @@ class VenafiCertificate(resource.Resource):
             common_name=common_name,
         )
         if len(sans) > 0:
+            LOG.info("Configuring SANs from list %s",sans)
             for n in sans:
                 if n.startswith(("IP:", "IP Address:")):
                     ip = n.split(":", 1)[1]
+                    LOG.info("Adding ip %s to ip_addresses", ip)
                     self.ip_addresses.append(ip)
                 elif n.startswith("DNS:"):
                     ns = n.split(":", 1)[1]
+                    LOG.info("Adding ns %s to san_dns", ns)
                     self.san_dns.append(ns)
                 elif n.startswith("email:"):
                     mail = n.split(":", 1)[1]
+                    LOG.info("Adding mail %s to email_addresses", mail)
                     self.email_addresses.append(mail)
                 else:
                     raise Exception("Failed to determine extension type: %s" % n)
             request.ip_addresses = self.ip_addresses
             request.san_dns = self.san_dns
             request.email_addresses = self.email_addresses
+            LOG.info("Request is %s, %s, %s", request.ip_addresses, request.san_dns, request.email_addresses)
 
-        if len(privatekey_passphrase) > 0:
+        if privatekey_passphrase is not None:
             request.key_password = privatekey_passphrase
 
         if privatekey_type:
@@ -269,15 +282,7 @@ class VenafiCertificate(resource.Resource):
             request.key_curve = curve
             request.key_length = key_size
 
-        san_dns = sans  # TODO: iomplement SANS list parsing
-        ip_addresses = []
-        email_addresses = []
-        request.ip_addresses = ip_addresses
-        request.san_dns = san_dns
-        request.email_addresses = email_addresses
-
         self.conn.request_cert(request, zone)
-        LOG.info("CSR is: %s", request.csr)
         while True:
             LOG.info("Trying to retrieve certificate")
             cert = self.conn.retrieve_cert(request)  # vcert.Certificate
@@ -301,11 +306,14 @@ class VenafiCertificate(resource.Resource):
             self.data_set('chain', chain, redact=False)
         LOG.info("Saving to data private_key: %s", self._cache[self.PRIVATE_KEY_ATTR])
         self.data_set('private_key', self._cache[self.PRIVATE_KEY_ATTR], redact=False)
+        LOG.info("Saving CSR to data")
+        self.data_set('csr', self._cache[self.CSR_ATTR], redact=False)
 
     def _resolve_attribute(self, name):
         attr_fn = {self.CERTIFICATE_ATTR: self.certificate,
                    self.CHAIN_ATTR: self.chain,
-                   self.PRIVATE_KEY_ATTR: self.private_key}
+                   self.PRIVATE_KEY_ATTR: self.private_key,
+                   self.CSR_ATTR: self.csr}
         return six.text_type(attr_fn[name])
 
     def get_reference_id(self):
