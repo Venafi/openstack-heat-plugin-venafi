@@ -24,6 +24,9 @@ from heat.engine import resource
 from heat.engine import support
 import time
 import sys
+import base64
+from cryptography import x509
+from cryptography.hazmat.backends import default_backend
 
 from oslo_log import log as logging
 
@@ -227,14 +230,18 @@ class VenafiCertificate(resource.Resource):
             return ''
 
     def get_connection(self):
-        # TODO: Handle exception if connection failed and set stack status to pending with timeout. Use
-        #  handle_suspend and handle_resume to handle connection problems.
         url = self.properties[self.VENAFI_URL]
         user = self.properties[self.TPP_USER]
         password = self.properties[self.TPP_PASSWORD]
         token = self.properties[self.API_KEY]
         # TODO: it should be possible to passs trust bundle as a base64 string
         trust_bundle = self.properties[self.TRUST_BUNDLE]
+        decoded_bundle = base64.decode(trust_bundle)
+        cert = x509.load_pem_x509_certificate(decoded_bundle.encode(), default_backend())
+        if isinstance(cert, x509.Certificate):
+            LOG.info("Will use decoded trust bundle as a trust bundle:\n %s", decoded_bundle)
+            trust_bundle = decoded_bundle
+
         fake = self.properties[self.FAKE]
         LOG.info("fake is %s", fake)
         if trust_bundle:
@@ -295,6 +302,7 @@ class VenafiCertificate(resource.Resource):
                 break
             try:
                 self.conn.request_cert(request, zone)
+            # TODO: Catch exception only if this is a connection problem. Exit immediately if bad credentials.
             except:
                 LOG.info("Error occured while trying request a certificate. Wil try later: %s", sys.exc_info()[0])
                 time.sleep(3)
