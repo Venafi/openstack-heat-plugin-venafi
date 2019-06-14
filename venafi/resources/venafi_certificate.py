@@ -23,6 +23,8 @@ from heat.engine import properties
 from heat.engine import resource
 from heat.engine import support
 import time
+import sys
+
 from oslo_log import log as logging
 
 from vcert import Connection, CertificateRequest
@@ -287,7 +289,16 @@ class VenafiCertificate(resource.Resource):
             request.key_curve = curve
             request.key_length = key_size
 
-        self.conn.request_cert(request, zone)
+        timeout = time.time() + 10 * 6
+        while True:
+            if time.time() > timeout:
+                break
+            try:
+                self.conn.request_cert(request, zone)
+            except:
+                LOG.info("Error occured while trying request a certificate. Wil try later: %s", sys.exc_info()[0])
+                time.sleep(3)
+
         while True:
             LOG.info("Trying to retrieve certificate")
             cert = self.conn.retrieve_cert(request)  # vcert.Certificate
