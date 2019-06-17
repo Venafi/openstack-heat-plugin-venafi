@@ -144,7 +144,7 @@ class TestVenafiCertificate:
                             'venafi_url': os.environ['TPPURL'],
                             'zone': os.environ['TPPZONE'],
                             # TODO: should be able to pass trust bundle as file path of a cert base64 string
-                            'trust_bundle': os.environ['TRUST_BUNDLE_PATH']
+                            'trust_bundle': os.environ['TRUST_BUNDLE']
                             }
         stack, client = self._prepare_tests("test_certificate.yml", 'tpp_cert_stack_', stack_parameters)
         res = client.resources.get(stack.id, 'venafi_certificate')

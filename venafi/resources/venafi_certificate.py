@@ -234,17 +234,19 @@ class VenafiCertificate(resource.Resource):
         user = self.properties[self.TPP_USER]
         password = self.properties[self.TPP_PASSWORD]
         token = self.properties[self.API_KEY]
-        # TODO: it should be possible to passs trust bundle as a base64 string
-        trust_bundle = self.properties[self.TRUST_BUNDLE]
-        decoded_bundle = base64.decode(trust_bundle)
-        cert = x509.load_pem_x509_certificate(decoded_bundle.encode(), default_backend())
-        if isinstance(cert, x509.Certificate):
-            LOG.info("Will use decoded trust bundle as a trust bundle:\n %s", decoded_bundle)
-            trust_bundle = decoded_bundle
-
         fake = self.properties[self.FAKE]
-        LOG.info("fake is %s", fake)
+        if fake:
+            LOG.info("Fake is %s. Will use fake connection", fake)
+        trust_bundle = self.properties[self.TRUST_BUNDLE]
+
         if trust_bundle:
+            try:
+                decoded_bundle = base64.b64decode(trust_bundle)
+            except:
+                LOG.info("Trust bundle %s is not base64 encoded string. Considering it's a file", trust_bundle)
+            else:
+                LOG.info("Will use decoded trust bundle as a trust bundle:\n %s", decoded_bundle)
+                trust_bundle = decoded_bundle
             return Connection(url, token, user, password, http_request_kwargs={"verify": trust_bundle}, fake=fake)
         return Connection(url, token, user, password, fake=fake)
 
