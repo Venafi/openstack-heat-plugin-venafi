@@ -24,10 +24,11 @@ from heat.engine import resource
 from heat.engine import support
 import time
 import sys
+from os import path
+from errno import ENOENT
 import base64
-from cryptography import x509
-from cryptography.hazmat.backends import default_backend
-
+from requests import exceptions as rExceptions
+import tempfile
 from oslo_log import log as logging
 
 from vcert import Connection, CertificateRequest
@@ -244,9 +245,16 @@ class VenafiCertificate(resource.Resource):
                 decoded_bundle = base64.b64decode(trust_bundle)
             except:
                 LOG.info("Trust bundle %s is not base64 encoded string. Considering it's a file", trust_bundle)
+                if not path.isfile(trust_bundle):
+                    raise IOError(ENOENT, 'Not a file', trust_bundle)
             else:
-                LOG.info("Will use decoded trust bundle as a trust bundle:\n %s", decoded_bundle)
-                trust_bundle = decoded_bundle
+                tmp_dir = tempfile.gettempdir()
+
+                f = open(path.join(tmp_dir,'venafi-temp-trust-bundle.pem'),"w+")
+                LOG.info("Saving decoded trust bundle to temp file %s", f.name)
+                f.write(decoded_bundle)
+                f.close()
+                trust_bundle = f.name
             return Connection(url, token, user, password, http_request_kwargs={"verify": trust_bundle}, fake=fake)
         return Connection(url, token, user, password, fake=fake)
 
@@ -305,8 +313,8 @@ class VenafiCertificate(resource.Resource):
             try:
                 self.conn.request_cert(request, zone)
             # TODO: Catch exception only if this is a connection problem. Exit immediately if bad credentials.
-            except:
-                LOG.info("Error occured while trying request a certificate. Wil try later: %s", sys.exc_info()[0])
+            except rExceptions.RequestException:
+                LOG.info("Request error occured during certificate request. Wil try later: %s", sys.exc_info()[0])
                 time.sleep(3)
 
         while True:
