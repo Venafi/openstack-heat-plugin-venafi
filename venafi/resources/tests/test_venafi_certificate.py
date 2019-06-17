@@ -137,7 +137,7 @@ class TestVenafiCertificate:
         print("Cert is fine:\n", stack.outputs[2]['output_value'])
 
     def test_tpp_enroll_cert(self):
-        cn = randomString(30) + '-tpp.cert.example.com'
+        cn = randomString(10) + '-tpp.cert.example.com'
         stack_parameters = {'common_name': cn,
                             'tpp_user': os.environ['TPPUSER'],
                             'tpp_password': os.environ['TPPPASSWORD'],
@@ -147,12 +147,20 @@ class TestVenafiCertificate:
                             'trust_bundle': os.environ['TRUST_BUNDLE']
                             }
         stack, client = self._prepare_tests("test_certificate.yml", 'tpp_cert_stack_', stack_parameters)
-        res = client.resources.get(stack.id, 'venafi_certificate')
-        # TODO: rewrite sleep to check of stack status
-        time.sleep(15)
-
-        if res.resource_status != 'CREATE_COMPLETE':
-            pytest.fail("Resource not found")
+        timeout = time.time() + 180
+        while True:
+            res = client.resources.get(stack.id, 'venafi_certificate')
+            if time.time() > timeout:
+                pytest.fail("Timeout for waiting resource is exceeded")
+                break
+            if res.resource_status == 'CREATE_COMPLETE':
+                break
+            elif res.resource_status == 'CREATE_FAILED':
+                pytest.fail("Resource create failed")
+                break
+            else:
+                print("Resource not found. Will wait")
+                time.sleep(10)
 
         cert = x509.load_pem_x509_certificate(stack.outputs[2]['output_value'].encode(), default_backend())
         assert isinstance(cert, x509.Certificate)
