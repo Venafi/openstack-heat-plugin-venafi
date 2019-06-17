@@ -161,14 +161,18 @@ class TestVenafiCertificate:
                 print("Resource not found. Will wait")
                 time.sleep(10)
 
+        cert_output = ''
         for output in stack.outputs:
             if output['output_key'] == 'venafi_certificate':
                 cert_output = output['output_value'].decode
-        cert = x509.load_pem_x509_certificate(cert_output, default_backend())
-        assert isinstance(cert, x509.Certificate)
-        assert cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME) == [
-            x509.NameAttribute(
-                NameOID.COMMON_NAME, cn
-            )
-        ]
-        print("Cert is fine:\n", stack.outputs[2]['output_value'])
+        if cert_output:
+            cert = x509.load_pem_x509_certificate(cert_output, default_backend())
+            assert isinstance(cert, x509.Certificate)
+            assert cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME) == [
+                x509.NameAttribute(
+                    NameOID.COMMON_NAME, cn
+                )
+            ]
+            print("Cert is fine:\n", stack.outputs[2]['output_value'])
+        else:
+            pytest.fail('venafi_certificate not found in output_value')
