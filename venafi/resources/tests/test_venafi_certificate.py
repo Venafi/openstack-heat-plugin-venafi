@@ -143,7 +143,6 @@ class TestVenafiCertificate:
                             'tpp_password': os.environ['TPPPASSWORD'],
                             'venafi_url': os.environ['TPPURL'],
                             'zone': os.environ['TPPZONE'],
-                            # TODO: should be able to pass trust bundle as file path of a cert base64 string
                             'trust_bundle': os.environ['TRUST_BUNDLE']
                             }
         stack, client = self._prepare_tests("test_certificate.yml", 'tpp_cert_stack_', stack_parameters)
@@ -162,7 +161,10 @@ class TestVenafiCertificate:
                 print("Resource not found. Will wait")
                 time.sleep(10)
 
-        cert = x509.load_pem_x509_certificate(stack.outputs[2]['output_value'].encode(), default_backend())
+        for output in stack.outputs:
+            if output['output_key'] == 'venafi_certificate':
+                cert_output = output['output_value'].decode
+        cert = x509.load_pem_x509_certificate(cert_output, default_backend())
         assert isinstance(cert, x509.Certificate)
         assert cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME) == [
             x509.NameAttribute(
