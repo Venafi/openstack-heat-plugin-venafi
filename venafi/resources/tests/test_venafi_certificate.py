@@ -114,38 +114,8 @@ class TestVenafiCertificate:
             print(stack.outputs)
         return stack, client
 
-    # Testing random string template to check that Heat is operating normally.
-    def test_random_string(self):
-        self._prepare_tests("random_string.yml", 'random_string_stack_', None)
-
-    def test_venafi_fake_cert(self):
-        cn = randomString(10) + '-fake.cert.example.com'
-        stack_parameters = {'common_name': cn, 'fake': 'true'}
-        stack, client = self._prepare_tests("test_certificate.yml", 'fake_cert_stack_', stack_parameters)
-        res = client.resources.get(stack.id, 'venafi_certificate')
-
-        if res.resource_status != 'CREATE_COMPLETE':
-            pytest.fail("Resource not found")
-
-        cert = x509.load_pem_x509_certificate(stack.outputs[2]['output_value'].encode(), default_backend())
-        assert isinstance(cert, x509.Certificate)
-        assert cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME) == [
-            x509.NameAttribute(
-                NameOID.COMMON_NAME, cn
-            )
-        ]
-        print("Cert is fine:\n", stack.outputs[2]['output_value'])
-
-    def test_tpp_enroll_cert(self):
-        cn = randomString(10) + '-tpp.cert.example.com'
-        stack_parameters = {'common_name': cn,
-                            'tpp_user': os.environ['TPPUSER'],
-                            'tpp_password': os.environ['TPPPASSWORD'],
-                            'venafi_url': os.environ['TPPURL'],
-                            'zone': os.environ['TPPZONE'],
-                            'trust_bundle': os.environ['TRUST_BUNDLE']
-                            }
-        stack, client = self._prepare_tests("test_certificate.yml", 'tpp_cert_stack_', stack_parameters)
+    def _venafi_enroll(self, stack_name, stack_parameters):
+        stack, client = self._prepare_tests("test_certificate.yml",stack_name , stack_parameters)
         timeout = time.time() + 180
         while True:
             res = client.resources.get(stack.id, 'venafi_certificate')
@@ -164,15 +134,37 @@ class TestVenafiCertificate:
         cert_output = ''
         for output in stack.outputs:
             if output['output_key'] == 'venafi_certificate':
-                cert_output = output['output_value'].decode
+                cert_output = output['output_value']
         if cert_output:
             cert = x509.load_pem_x509_certificate(cert_output, default_backend())
             assert isinstance(cert, x509.Certificate)
             assert cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME) == [
                 x509.NameAttribute(
-                    NameOID.COMMON_NAME, cn
+                    NameOID.COMMON_NAME, stack_parameters['common_name']
                 )
             ]
             print("Cert is fine:\n", stack.outputs[2]['output_value'])
         else:
             pytest.fail('venafi_certificate not found in output_value')
+
+    # Testing random string template to check that Heat is operating normally.
+    def test_random_string(self):
+        self._prepare_tests("random_string.yml", 'random_string_stack_', None)
+
+    def test_venafi_fake_cert(self):
+        cn = randomString(10) + '-fake.cert.example.com'
+        stack_parameters = {'common_name': cn, 'fake': 'true'}
+        stack_name = 'fake_cert_stack_'
+        self._venafi_enroll(stack_name, stack_parameters)
+
+    def test_tpp_enroll_cert(self):
+        cn = randomString(10) + '-tpp.cert.example.com'
+        stack_parameters = {'common_name': cn,
+                            'tpp_user': os.environ['TPPUSER'],
+                            'tpp_password': os.environ['TPPPASSWORD'],
+                            'venafi_url': os.environ['TPPURL'],
+                            'zone': os.environ['TPPZONE'],
+                            'trust_bundle': os.environ['TRUST_BUNDLE']
+                            }
+        stack_name = 'tpp_cert_stack_'
+        self._venafi_enroll(stack_name, stack_parameters)
