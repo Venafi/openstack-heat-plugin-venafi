@@ -168,3 +168,13 @@ class TestVenafiCertificate:
                             }
         stack_name = 'tpp_cert_stack_'
         self._venafi_enroll(stack_name, stack_parameters)
+
+    def test_cloud_enroll_cert(self):
+        cn = randomString(10) + '-tpp.cert.example.com'
+        stack_parameters = {'common_name': cn,
+                            'api_key': os.environ['CLOUDAPIKEY'],
+                            'venafi_url': os.environ['CLOUDURL'],
+                            'zone': os.environ['TPPZONE'],
+                            }
+        stack_name = 'tpp_cert_stack_'
+        self._venafi_enroll(stack_name, stack_parameters)

@@ -18,6 +18,9 @@ parameters:
     type: string
     default: ""
     hidden: true
+  api_key:
+    type: string
+    default: ""
   venafi_url:
     type: string
     default: ""
@@ -42,6 +45,7 @@ resources:
       zone: { get_param: zone }
       common_name: { get_param: common_name }
       venafi_url: { get_param: venafi_url }
+      api_key: { get_param: api_key }
       tpp_user: { get_param: tpp_user }
       tpp_password: { get_param: tpp_password }
       fake: { get_param: fake }
