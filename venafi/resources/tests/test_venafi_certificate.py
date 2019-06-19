@@ -136,7 +136,7 @@ class TestVenafiCertificate:
             if output['output_key'] == 'venafi_certificate':
                 cert_output = output['output_value']
         if cert_output:
-            cert = x509.load_pem_x509_certificate(cert_output, default_backend())
+            cert = x509.load_pem_x509_certificate(cert_output.encode(), default_backend())
             assert isinstance(cert, x509.Certificate)
             assert cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME) == [
                 x509.NameAttribute(
