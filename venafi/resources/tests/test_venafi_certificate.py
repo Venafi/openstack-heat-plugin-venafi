@@ -114,9 +114,9 @@ class TestVenafiCertificate:
             print(stack.outputs)
         return stack, client
 
-    def _venafi_enroll(self, stack_name, stack_parameters):
+    def _venafi_enroll(self, stack_name, stack_parameters, timeout):
         stack, client = self._prepare_tests("test_certificate.yml",stack_name , stack_parameters)
-        timeout = time.time() + 180
+        timeout = time.time() + timeout
         while True:
             res = client.resources.get(stack.id, 'venafi_certificate')
             if time.time() > timeout:
@@ -155,7 +155,7 @@ class TestVenafiCertificate:
         cn = randomString(10) + '-fake.cert.example.com'
         stack_parameters = {'common_name': cn, 'fake': 'true'}
         stack_name = 'fake_cert_stack_'
-        self._venafi_enroll(stack_name, stack_parameters)
+        self._venafi_enroll(stack_name, stack_parameters, 30)
 
     def test_tpp_enroll_cert(self):
         cn = randomString(10) + '-tpp.cert.example.com'
@@ -167,14 +167,15 @@ class TestVenafiCertificate:
                             'trust_bundle': os.environ['TRUST_BUNDLE']
                             }
         stack_name = 'tpp_cert_stack_'
-        self._venafi_enroll(stack_name, stack_parameters)
+        self._venafi_enroll(stack_name, stack_parameters, 180)
 
     def test_cloud_enroll_cert(self):
-        cn = randomString(10) + '-tpp.cert.example.com'
+        cn = randomString(10) + '-cloud.venafi.example.com'
         stack_parameters = {'common_name': cn,
+                            'sans': ["DNS:www.venafi.example.com","DNS:m.venafi.example.com"],
                             'api_key': os.environ['CLOUDAPIKEY'],
                             'venafi_url': os.environ['CLOUDURL'],
-                            'zone': os.environ['TPPZONE'],
+                            'zone': os.environ['CLOUDZONE'],
                             }
-        stack_name = 'tpp_cert_stack_'
-        self._venafi_enroll(stack_name, stack_parameters)
+        stack_name = 'cloud_cert_stack_'
+        self._venafi_enroll(stack_name, stack_parameters, 240)

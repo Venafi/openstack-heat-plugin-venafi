@@ -11,6 +11,9 @@ parameters:
     label: Common Name
     description: Name of key-pair to be used for compute instance
     default: 'fake.cert.example.com'
+  sans:
+    type: comma_delimited_list
+    default: ["IP:192.168.1.1","DNS:www.venafi.example.com","DNS:m.venafi.example.com","email:test@venafi.com","IP Address:192.168.2.2"]
   tpp_user:
     type: string
     default: ""
@@ -52,11 +55,7 @@ resources:
       trust_bundle: { get_param: trust_bundle }
       save_private_key: { get_param: save_private_key }
       sans:
-        - "IP:192.168.1.1"
-        - "DNS:www.venafi.example.com"
-        - "DNS:m.venafi.example.com"
-        - "email:test@venafi.com"
-        - "IP Address:192.168.2.2"
+        { get_param: sans }
 
 outputs:
   venafi_certificate:
