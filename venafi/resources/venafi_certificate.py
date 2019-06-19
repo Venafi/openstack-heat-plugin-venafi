@@ -31,7 +31,7 @@ from requests import exceptions as rExceptions
 import tempfile
 from oslo_log import log as logging
 
-from vcert import Connection, CertificateRequest
+from vcert import Connection, CertificateRequest, TPPConnection
 
 NOVA_MICROVERSIONS = (MICROVERSION_KEY_TYPE,
                       MICROVERSION_USER) = ('2.2', '2.10')
@@ -307,15 +307,19 @@ class VenafiCertificate(resource.Resource):
             request.key_length = key_size
 
         timeout = time.time() + 10 * 6
-        while True:
-            if time.time() > timeout:
-                break
-            try:
-                self.conn.request_cert(request, zone)
-            # TODO: Catch exception only if this is a connection problem. Exit immediately if bad credentials.
-            except rExceptions.RequestException:
-                LOG.info("Request error occured during certificate request. Wil try later: %s", sys.exc_info()[0])
-                time.sleep(3)
+        # If we're using TPP connection try to reconnecto on connection error.
+        if isinstance(self.conn, TPPConnection):
+            while True:
+                if time.time() > timeout:
+                    break
+                try:
+                    self.conn.request_cert(request, zone)
+                # TODO: Catch exception only if this is a connection problem. Exit immediately if bad credentials.
+                except rExceptions.RequestException:
+                    LOG.info("Request error occured during certificate request. Wil try later: %s", sys.exc_info()[0])
+                    time.sleep(3)
+        else:
+            self.conn.request_cert(request, zone)
 
         while True:
             LOG.info("Trying to retrieve certificate")
