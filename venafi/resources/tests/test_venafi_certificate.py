@@ -160,7 +160,7 @@ class TestVenafiCertificate:
     def test_tpp_enroll_cert(self):
         cn = randomString(10) + '-tpp.venafi.example.com'
         stack_parameters = {'common_name': cn,
-                            'sans': ["DNS:www.venafi.example.com", "DNS:m.venafi.example.com"],
+                            'sans': ["IP:192.168.1.1","DNS:www.venafi.example.com","DNS:m.venafi.example.com","email:test@venafi.com","IP Address:192.168.2.2"],
                             'tpp_user': os.environ['TPPUSER'],
                             'tpp_password': os.environ['TPPPASSWORD'],
                             'venafi_url': os.environ['TPPURL'],
@@ -173,7 +173,7 @@ class TestVenafiCertificate:
     def test_cloud_enroll_cert(self):
         cn = randomString(10) + '-cloud.venafi.example.com'
         stack_parameters = {'common_name': cn,
-                            'sans': ["DNS:www.venafi.example.com","DNS:m.venafi.example.com"],
+                            # 'sans': ["DNS:www.venafi.example.com","DNS:m.venafi.example.com"],
                             'api_key': os.environ['CLOUDAPIKEY'],
                             'venafi_url': os.environ['CLOUDURL'],
                             'zone': os.environ['CLOUDZONE'],

@@ -13,7 +13,7 @@ parameters:
     default: 'fake.cert.example.com'
   sans:
     type: comma_delimited_list
-    default: ["IP:192.168.1.1","DNS:www.venafi.example.com","DNS:m.venafi.example.com","email:test@venafi.com","IP Address:192.168.2.2"]
+    default: []
   tpp_user:
     type: string
     default: ""
