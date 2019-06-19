@@ -143,7 +143,7 @@ class TestVenafiCertificate:
                     NameOID.COMMON_NAME, stack_parameters['common_name']
                 )
             ]
-            print("Cert is fine:\n", stack.outputs[2]['output_value'])
+            print("Cert is fine:\n", cert_output)
         else:
             pytest.fail('venafi_certificate not found in output_value')
 
