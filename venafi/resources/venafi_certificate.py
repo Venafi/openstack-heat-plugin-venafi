@@ -335,7 +335,7 @@ class VenafiCertificate(resource.Resource):
         self._cache = self.enroll()
         LOG.info("Saving to data certificate: %s", self._cache[self.CERTIFICATE_ATTR])
         self.data_set('certificate', self._cache[self.CERTIFICATE_ATTR], redact=False)
-        chain = self._cache[self.CHAIN_ATTR]
+        chain = '\n'.join(self._cache[self.CHAIN_ATTR])
         if len(chain) > 0:
             LOG.info("Saving to data chain: %s", chain)
             self.data_set('chain', chain, redact=False)

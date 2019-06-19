@@ -158,8 +158,9 @@ class TestVenafiCertificate:
         self._venafi_enroll(stack_name, stack_parameters, 30)
 
     def test_tpp_enroll_cert(self):
-        cn = randomString(10) + '-tpp.cert.example.com'
+        cn = randomString(10) + '-tpp.venafi.example.com'
         stack_parameters = {'common_name': cn,
+                            'sans': ["DNS:www.venafi.example.com", "DNS:m.venafi.example.com"],
                             'tpp_user': os.environ['TPPUSER'],
                             'tpp_password': os.environ['TPPPASSWORD'],
                             'venafi_url': os.environ['TPPURL'],
