@@ -6,6 +6,7 @@ description: >
    Venafi testing certificate
 
 parameters:
+  #Subject parameters
   common_name:
     type: string
     label: Common Name
@@ -14,6 +15,7 @@ parameters:
   sans:
     type: comma_delimited_list
     default: []
+  #TPP credentials parameters
   tpp_user:
     type: string
     default: ""
@@ -21,24 +23,35 @@ parameters:
     type: string
     default: ""
     hidden: true
+  #Cloud credentials parameters
   api_key:
     type: string
     default: ""
+    hidden: true
+  #Conection parameters
   venafi_url:
     type: string
     default: ""
   trust_bundle:
     type: string
     default: ""
+  #TPP or Cloud policy name
   zone:
     type: string
     default: "Default"
+  #Set it to true if you want to use face connecto for testing purposes
   fake:
     type: boolean
     default: "false"
+  #Save or not to save private key in stack
   save_private_key:
     type: boolean
     default: "true"
+  #Instance params
+  image:
+    type: string
+  flavor:
+    type: string
 
 resources:
   venafi_certificate:
@@ -56,6 +69,33 @@ resources:
       save_private_key: { get_param: save_private_key }
       sans:
         { get_param: sans }
+
+  ssl_config:
+    type: OS::Heat::CloudConfig
+    properties:
+      cloud_config:
+        write_files:
+        - path: /etc/apache/certs/server.crt
+          content: { get_attr: [venafi_certificate, certificate] }
+        - path: /etc/apache/certs/server.key
+          content: { get_attr: [venafi_certificate, private_key] }
+        - path: /etc/apache/certs/chain.crt
+          content: { get_attr: [venafi_certificate, chain] }
+
+  ssl_server_init:
+    type: OS::Heat::MultipartMime
+    properties:
+      parts:
+      - config: {get_resource: ssl_config}
+
+  ssl_instance:
+    type: OS::Nova::Server
+    properties:
+      image: {get_param: image}
+      flavor: {get_param: flavor}
+      user_data_format: RAW
+      user_data:
+        get_resource: server_init
 
 outputs:
   venafi_certificate:

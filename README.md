@@ -20,6 +20,14 @@ ln -s $(python -m site --user-site)/venafi-openstack-heat-plugin /usr/lib/heat/
 sudo systemctl restart devstack@h-eng
 ```
 
+### Usage
+
+You can find example yml resource in [test_certificate.yml](venafi/resources/tests/fixtures/test_certificate.yml)  
+We recommend to export credentials as variables and add them as hidden parameters to the stack:
+```bash
+
+```
+
 ##### Test instructions:
 1. Contribute into plugin https://github.com/Venafi/venafi-openstack-heat-plugin
 1. Update the plugin on  host:   

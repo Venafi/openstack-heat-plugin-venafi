@@ -269,9 +269,11 @@ class VenafiCertificate(resource.Resource):
         zone = self.properties[self.ZONE]
 
         LOG.info("Creating request with CN %s", common_name)
+        zone_config = self.conn.read_zone_conf(zone)
         request = CertificateRequest(
             common_name=common_name,
         )
+        request.update_from_zone(zone_config)
         if len(sans) > 0:
             LOG.info("Configuring SANs from list %s",sans)
             for n in sans:
@@ -318,6 +320,8 @@ class VenafiCertificate(resource.Resource):
                 except rExceptions.RequestException:
                     LOG.info("Request error occured during certificate request. Wil try later: %s", sys.exc_info()[0])
                     time.sleep(3)
+                except Exception:
+                    break
         else:
             self.conn.request_cert(request, zone)
 
