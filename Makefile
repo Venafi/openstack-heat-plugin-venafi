@@ -24,7 +24,7 @@ e2e_fake_create:
 	--parameter fake='true' \
 	$(STACK_NAME)-$(RANDOM_SITE)
 	@echo "To check stack run the command:"
-	@echo openstack stack output show $(STACK_NAME)-$(RANDOM_SITE) venafi_certificate -c output_value -f shell
+	@echo openstack stack output show $(STACK_NAME)-$(RANDOM_SITE) -c outputs -f shell
 
 e2e_tpp_create:
 	$(eval RANDOM_SITE := $(shell echo $(RANDOM_SITE_EXP)))
@@ -38,7 +38,7 @@ e2e_tpp_create:
 	--parameter trust_bundle=$(TRUST_BUNDLE) \
 	$(STACK_NAME)-$(RANDOM_SITE)
 	@echo "To check stack run the command:"
-	@echo openstack stack output show $(STACK_NAME)-$(RANDOM_SITE) venafi_certificate -c output_value -f shell
+	@echo openstack stack output show $(STACK_NAME)-$(RANDOM_SITE) -c outputs -f shell
 
 e2e_cloud_create:
 	$(eval RANDOM_SITE := $(shell echo $(RANDOM_SITE_EXP)))
@@ -51,7 +51,7 @@ e2e_cloud_create:
 	--parameter trust_bundle=$(TRUST_BUNDLE) \
 	$(STACK_NAME)-$(RANDOM_SITE)
 	@echo "To check stack run the command:"
-	@echo openstack stack output show $(STACK_NAME)-$(RANDOM_SITE) venafi_certificate -c output_value -f shell
+	@echo openstack stack output show $(STACK_NAME)-$(RANDOM_SITE) -c outputs -f shell
 
 e2e_show:
 	openstack stack show $(STACK_NAME) -c parameters

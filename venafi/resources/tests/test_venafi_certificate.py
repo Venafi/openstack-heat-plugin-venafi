@@ -115,7 +115,7 @@ class TestVenafiCertificate:
         return stack, client
 
     def _venafi_enroll(self, stack_name, stack_parameters, timeout):
-        stack, client = self._prepare_tests("test_certificate.yml",stack_name , stack_parameters)
+        stack, client = self._prepare_tests("test_certificate_output_only.yml",stack_name , stack_parameters)
         timeout = time.time() + timeout
         while True:
             res = client.resources.get(stack.id, 'venafi_certificate')
