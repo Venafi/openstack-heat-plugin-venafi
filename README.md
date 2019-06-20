@@ -1,3 +1,25 @@
+## Veanfi Heat Plugin
+This plugin is made to request certificate from Venafi Platform or Cloud and save it to the
+Heat resource.
+
+### Installation
+1. Install vcert and venafi-openstack-heat-plugin pip packages on openstack instance:
+```bash
+pip install vcert venafi-openstack-heat-plugin
+``` 
+2. Create directory /usr/lib/heat
+```bash
+mkdir -p /usr/lib/heat
+```
+3. link installed plugin into /usr/lib/heat
+```bash
+ln -s $(python -m site --user-site)/venafi-openstack-heat-plugin /usr/lib/heat/
+``` 
+4. restart heat engine:
+```bash
+sudo systemctl restart devstack@h-eng
+```
+
 ##### Test instructions:
 1. Contribute into plugin https://github.com/Venafi/venafi-openstack-heat-plugin
 1. Update the plugin on  host:   
