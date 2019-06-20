@@ -1,19 +1,58 @@
+# Domain used on Venafi Platform demo resources
+TPP_DOMAIN := venqa.venafi.com
+# Domain used in Venafi Cloud demo resources
+CLOUD_DOMAIN := venafi.example.com
+# Domain used in fake demo resources
+FAKE_DOMAIN := fake.example.com
+#Random site name for demo resources
+RANDOM_SITE_EXP := $$(head /dev/urandom | tr -dc a-z0-9 | head -c 5 ; echo '')
 STACK_NAME=venafi-tests-stack
+
 default: deploy test
 
 deploy:
 	python venafi/resources/tests/deploy_venafi_certificate_plugin.py
+
 test:
 	pytest -W ignore venafi/resources/tests/
-e2e_create:
+
+e2e_fake_create:
+	$(eval RANDOM_SITE := $(shell echo $(RANDOM_SITE_EXP)))
 	openstack stack create -t venafi/resources/tests/fixtures/test_certificate.yml \
-	--parameter common_name="tpp-cert.example.com" \
-	--parameter tpp_user=${TPPUSER} \
-	--parameter tpp_password=${TPPPASSWORD} \
-	--parameter venafi_url=${TPPURL} \
-	--parameter zone=${TPPZONE} \
-	--parameter trust_bundle=${TRUST_BUNDLE} \
-	$(STACK_NAME)
+	--parameter common_name="tpp-$(RANDOM_SITE).example.com" \
+	--parameter sans="IP:192.168.1.1","DNS:www.venafi.example.com","DNS:m.venafi.example.com","email:test@venafi.com","IP Address:192.168.2.2" \
+	--parameter fake='true' \
+	$(STACK_NAME)-$(RANDOM_SITE)
+	@echo "To check stack run the command:"
+	@echo openstack stack output show $(STACK_NAME)-$(RANDOM_SITE) venafi_certificate -c output_value -f shell
+
+e2e_tpp_create:
+	$(eval RANDOM_SITE := $(shell echo $(RANDOM_SITE_EXP)))
+	openstack stack create -t venafi/resources/tests/fixtures/test_certificate.yml \
+	--parameter common_name="tpp-$(RANDOM_SITE).venafi.example.com" \
+	--parameter sans="IP:192.168.1.1","DNS:www.venafi.example.com","DNS:m.venafi.example.com","email:test@venafi.com","IP Address:192.168.2.2" \
+	--parameter tpp_user=$(TPPUSER) \
+	--parameter tpp_password=$(TPPPASSWORD) \
+	--parameter venafi_url=$(TPPURL) \
+	--parameter zone=$(TPPZONE) \
+	--parameter trust_bundle=$(TRUST_BUNDLE) \
+	$(STACK_NAME)-$(RANDOM_SITE)
+	@echo "To check stack run the command:"
+	@echo openstack stack output show $(STACK_NAME)-$(RANDOM_SITE) venafi_certificate -c output_value -f shell
+
+e2e_cloud_create:
+	$(eval RANDOM_SITE := $(shell echo $(RANDOM_SITE_EXP)))
+	openstack stack create -t venafi/resources/tests/fixtures/test_certificate.yml \
+	--parameter common_name="cloud-$(RANDOM_SITE).example.com" \
+	--parameter sans=["DNS:www.venafi.example.com","DNS:m.venafi.example.com"] \
+	--parameter api_key=$(CLOUDAPIKEY) \
+	--parameter venafi_url=$(TPPURL) \
+	--parameter zone=$(TPPZONE) \
+	--parameter trust_bundle=$(TRUST_BUNDLE) \
+	$(STACK_NAME)-$(RANDOM_SITE)
+	@echo "To check stack run the command:"
+	@echo openstack stack output show $(STACK_NAME)-$(RANDOM_SITE) venafi_certificate -c output_value -f shell
+
 e2e_show:
 	openstack stack show $(STACK_NAME) -c parameters
 	openstack stack show $(STACK_NAME) -c outputs -f shell

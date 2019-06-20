@@ -6,11 +6,16 @@ description: >
    Venafi testing certificate
 
 parameters:
+  #Subject parameters
   common_name:
     type: string
     label: Common Name
     description: Name of key-pair to be used for compute instance
     default: 'fake.cert.example.com'
+  sans:
+    type: comma_delimited_list
+    default: []
+  #TPP credentials parameters
   tpp_user:
     type: string
     default: ""
@@ -18,21 +23,37 @@ parameters:
     type: string
     default: ""
     hidden: true
+  #Cloud credentials parameters
+  api_key:
+    type: string
+    default: ""
+    hidden: true
+  #Conection parameters
   venafi_url:
     type: string
     default: ""
   trust_bundle:
     type: string
     default: ""
+  #TPP or Cloud policy name
   zone:
     type: string
     default: "Default"
+  #Set it to true if you want to use face connecto for testing purposes
   fake:
     type: boolean
     default: "false"
+  #Save or not to save private key in stack
   save_private_key:
     type: boolean
     default: "true"
+  #Instance params
+  image:
+    type: string
+    default: "bionic-server-cloudimg-amd64"
+  flavor:
+    type: string
+    default: "m1.tiny"
 
 resources:
   venafi_certificate:
@@ -42,17 +63,41 @@ resources:
       zone: { get_param: zone }
       common_name: { get_param: common_name }
       venafi_url: { get_param: venafi_url }
+      api_key: { get_param: api_key }
       tpp_user: { get_param: tpp_user }
       tpp_password: { get_param: tpp_password }
       fake: { get_param: fake }
       trust_bundle: { get_param: trust_bundle }
       save_private_key: { get_param: save_private_key }
       sans:
-        - "IP:192.168.1.1"
-        - "DNS:www.venafi.example.com"
-        - "DNS:m.venafi.example.com"
-        - "email:test@venafi.com"
-        - "IP Address:192.168.2.2"
+        { get_param: sans }
+
+  ssl_config:
+    type: OS::Heat::CloudConfig
+    properties:
+      cloud_config:
+        write_files:
+        - path: /etc/apache/certs/server.crt
+          content: { get_attr: [venafi_certificate, certificate] }
+        - path: /etc/apache/certs/server.key
+          content: { get_attr: [venafi_certificate, private_key] }
+        - path: /etc/apache/certs/chain.crt
+          content: { get_attr: [venafi_certificate, chain] }
+
+  ssl_server_init:
+    type: OS::Heat::MultipartMime
+    properties:
+      parts:
+      - config: {get_resource: ssl_config}
+
+  ssl_instance:
+    type: OS::Nova::Server
+    properties:
+      image: {get_param: image}
+      flavor: {get_param: flavor}
+      user_data_format: RAW
+      user_data:
+        get_resource: ssl_server_init
 
 outputs:
   venafi_certificate:

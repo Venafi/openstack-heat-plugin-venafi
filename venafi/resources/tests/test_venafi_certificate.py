@@ -114,51 +114,73 @@ class TestVenafiCertificate:
             print(stack.outputs)
         return stack, client
 
+    def _venafi_enroll(self, stack_name, stack_parameters, timeout):
+        stack, client = self._prepare_tests("test_certificate.yml",stack_name , stack_parameters)
+        timeout = time.time() + timeout
+        while True:
+            res = client.resources.get(stack.id, 'venafi_certificate')
+            if time.time() > timeout:
+                pytest.fail("Timeout for waiting resource is exceeded")
+                break
+            if res.resource_status == 'CREATE_COMPLETE':
+                break
+            elif res.resource_status == 'CREATE_FAILED':
+                pytest.fail("Resource create failed")
+                break
+            else:
+                print("Resource not found. Will wait")
+                time.sleep(10)
+
+        cert_output = ''
+        for output in stack.outputs:
+            if output['output_key'] == 'venafi_certificate':
+                cert_output = output['output_value']
+        if cert_output:
+            cert = x509.load_pem_x509_certificate(cert_output.encode(), default_backend())
+            assert isinstance(cert, x509.Certificate)
+            assert cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME) == [
+                x509.NameAttribute(
+                    NameOID.COMMON_NAME, stack_parameters['common_name']
+                )
+            ]
+            print("Cert is fine:\n", cert_output)
+        else:
+            pytest.fail('venafi_certificate not found in output_value')
+
     # Testing random string template to check that Heat is operating normally.
     def test_random_string(self):
         self._prepare_tests("random_string.yml", 'random_string_stack_', None)
 
     def test_venafi_fake_cert(self):
         cn = randomString(10) + '-fake.cert.example.com'
-        stack_parameters = {'common_name': cn, 'fake': 'true'}
-        stack, client = self._prepare_tests("test_certificate.yml", 'fake_cert_stack_', stack_parameters)
-        res = client.resources.get(stack.id, 'venafi_certificate')
-
-        if res.resource_status != 'CREATE_COMPLETE':
-            pytest.fail("Resource not found")
-
-        cert = x509.load_pem_x509_certificate(stack.outputs[2]['output_value'].encode(), default_backend())
-        assert isinstance(cert, x509.Certificate)
-        assert cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME) == [
-            x509.NameAttribute(
-                NameOID.COMMON_NAME, cn
-            )
-        ]
-        print("Cert is fine:\n", stack.outputs[2]['output_value'])
+        stack_parameters = {'common_name': cn,
+                            'sans': ["IP:192.168.1.1","DNS:www.venafi.example.com","DNS:m.venafi.example.com",
+                                     "email:test@venafi.com","IP Address:192.168.2.2"],
+                            'fake': 'true'}
+        stack_name = 'fake_cert_stack_'
+        self._venafi_enroll(stack_name, stack_parameters, 30)
 
     def test_tpp_enroll_cert(self):
-        cn = randomString(30) + '-tpp.cert.example.com'
+        cn = randomString(10) + '-tpp.venafi.example.com'
         stack_parameters = {'common_name': cn,
+                            'sans': ["IP:192.168.1.1","DNS:www.venafi.example.com","DNS:m.venafi.example.com",
+                                     "email:test@venafi.com","IP Address:192.168.2.2"],
                             'tpp_user': os.environ['TPPUSER'],
                             'tpp_password': os.environ['TPPPASSWORD'],
                             'venafi_url': os.environ['TPPURL'],
                             'zone': os.environ['TPPZONE'],
-                            # TODO: should be able to pass trust bundle as file path of a cert base64 string
-                            'trust_bundle': os.environ['TRUST_BUNDLE_PATH']
+                            'trust_bundle': os.environ['TRUST_BUNDLE']
                             }
-        stack, client = self._prepare_tests("test_certificate.yml", 'tpp_cert_stack_', stack_parameters)
-        res = client.resources.get(stack.id, 'venafi_certificate')
-        # TODO: rewrite sleep to check of stack status
-        time.sleep(15)
+        stack_name = 'tpp_cert_stack_'
+        self._venafi_enroll(stack_name, stack_parameters, 180)
 
-        if res.resource_status != 'CREATE_COMPLETE':
-            pytest.fail("Resource not found")
-
-        cert = x509.load_pem_x509_certificate(stack.outputs[2]['output_value'].encode(), default_backend())
-        assert isinstance(cert, x509.Certificate)
-        assert cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME) == [
-            x509.NameAttribute(
-                NameOID.COMMON_NAME, cn
-            )
-        ]
-        print("Cert is fine:\n", stack.outputs[2]['output_value'])
+    def test_cloud_enroll_cert(self):
+        cn = randomString(10) + '-cloud.venafi.example.com'
+        stack_parameters = {'common_name': cn,
+                            # 'sans': ["DNS:www.venafi.example.com","DNS:m.venafi.example.com"],
+                            'api_key': os.environ['CLOUDAPIKEY'],
+                            'venafi_url': os.environ['CLOUDURL'],
+                            'zone': os.environ['CLOUDZONE'],
+                            }
+        stack_name = 'cloud_cert_stack_'
+        self._venafi_enroll(stack_name, stack_parameters, 240)

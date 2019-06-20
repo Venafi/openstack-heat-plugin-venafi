@@ -23,9 +23,15 @@ from heat.engine import properties
 from heat.engine import resource
 from heat.engine import support
 import time
+import sys
+from os import path
+from errno import ENOENT
+import base64
+from requests import exceptions as rExceptions
+import tempfile
 from oslo_log import log as logging
 
-from vcert import Connection, CertificateRequest
+from vcert import Connection, CertificateRequest, TPPConnection
 
 NOVA_MICROVERSIONS = (MICROVERSION_KEY_TYPE,
                       MICROVERSION_USER) = ('2.2', '2.10')
@@ -225,17 +231,30 @@ class VenafiCertificate(resource.Resource):
             return ''
 
     def get_connection(self):
-        # TODO: Handle exception if connection failed and set stack status to pending with timeout. Use
-        #  handle_suspend and handle_resume to handle connection problems.
         url = self.properties[self.VENAFI_URL]
         user = self.properties[self.TPP_USER]
         password = self.properties[self.TPP_PASSWORD]
         token = self.properties[self.API_KEY]
-        # TODO: it should be possible to passs trust bundle as a base64 string
-        trust_bundle = self.properties[self.TRUST_BUNDLE]
         fake = self.properties[self.FAKE]
-        LOG.info("fake is %s", fake)
+        if fake:
+            LOG.info("Fake is %s. Will use fake connection", fake)
+        trust_bundle = self.properties[self.TRUST_BUNDLE]
+
         if trust_bundle:
+            try:
+                decoded_bundle = base64.b64decode(trust_bundle)
+            except:
+                LOG.info("Trust bundle %s is not base64 encoded string. Considering it's a file", trust_bundle)
+                if not path.isfile(trust_bundle):
+                    raise IOError(ENOENT, 'Not a file', trust_bundle)
+            else:
+                tmp_dir = tempfile.gettempdir()
+
+                f = open(path.join(tmp_dir,'venafi-temp-trust-bundle.pem'),"w+")
+                LOG.info("Saving decoded trust bundle to temp file %s", f.name)
+                f.write(decoded_bundle)
+                f.close()
+                trust_bundle = f.name
             return Connection(url, token, user, password, http_request_kwargs={"verify": trust_bundle}, fake=fake)
         return Connection(url, token, user, password, fake=fake)
 
@@ -250,9 +269,11 @@ class VenafiCertificate(resource.Resource):
         zone = self.properties[self.ZONE]
 
         LOG.info("Creating request with CN %s", common_name)
+        zone_config = self.conn.read_zone_conf(zone)
         request = CertificateRequest(
             common_name=common_name,
         )
+        request.update_from_zone(zone_config)
         if len(sans) > 0:
             LOG.info("Configuring SANs from list %s",sans)
             for n in sans:
@@ -287,7 +308,23 @@ class VenafiCertificate(resource.Resource):
             request.key_curve = curve
             request.key_length = key_size
 
-        self.conn.request_cert(request, zone)
+        timeout = time.time() + 10 * 6
+        # If we're using TPP connection try to reconnecto on connection error.
+        if isinstance(self.conn, TPPConnection):
+            while True:
+                if time.time() > timeout:
+                    break
+                try:
+                    self.conn.request_cert(request, zone)
+                # TODO: Catch exception only if this is a connection problem. Exit immediately if bad credentials.
+                except rExceptions.RequestException:
+                    LOG.info("Request error occured during certificate request. Wil try later: %s", sys.exc_info()[0])
+                    time.sleep(3)
+                except Exception:
+                    break
+        else:
+            self.conn.request_cert(request, zone)
+
         while True:
             LOG.info("Trying to retrieve certificate")
             cert = self.conn.retrieve_cert(request)  # vcert.Certificate
@@ -306,7 +343,7 @@ class VenafiCertificate(resource.Resource):
         self._cache = self.enroll()
         LOG.info("Saving to data certificate: %s", self._cache[self.CERTIFICATE_ATTR])
         self.data_set('certificate', self._cache[self.CERTIFICATE_ATTR], redact=False)
-        chain = self._cache[self.CHAIN_ATTR]
+        chain = '\n'.join(self._cache[self.CHAIN_ATTR])
         if len(chain) > 0:
             LOG.info("Saving to data chain: %s", chain)
             self.data_set('chain', chain, redact=False)
