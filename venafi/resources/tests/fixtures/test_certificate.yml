@@ -50,8 +50,10 @@ parameters:
   #Instance params
   image:
     type: string
+    default: "bionic-server-cloudimg-amd64"
   flavor:
     type: string
+    default: "m1.tiny"
 
 resources:
   venafi_certificate:
@@ -95,7 +97,7 @@ resources:
       flavor: {get_param: flavor}
       user_data_format: RAW
       user_data:
-        get_resource: server_init
+        get_resource: ssl_server_init
 
 outputs:
   venafi_certificate:
