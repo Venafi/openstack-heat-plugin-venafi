@@ -89,6 +89,17 @@ resources:
           content: { get_attr: [venafi_certificate, private_key] }
         - path: /etc/nginx/certs/chain.crt
           content: { get_attr: [venafi_certificate, chain] }
+        - path: /etc/nginx/conf.d/example.com.conf
+          content: |
+            server {
+                listen 443;
+                ssl on;
+                ssl_certificate /etc/nginx/certs/server.crt;
+                ssl_certificate_key /etc/nginx/certs/server.key;
+                server_name venafi.example.com;
+                root /var/www/html;
+            }
+
         runcmd:
           - 'echo "nameserver 8.8.8.8" |sudo tee > /etc/resolv.conf'
           - 'sudo apt-get install -y nginx'

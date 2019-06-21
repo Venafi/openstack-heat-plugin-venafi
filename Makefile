@@ -38,7 +38,7 @@ e2e_tpp_create:
 	--parameter venafi_url=$(TPPURL) \
 	--parameter zone=$(TPPZONE) \
 	--parameter trust_bundle=$(TRUST_BUNDLE) \
-	$(STACK_NAME)-fake-$(RANDOM_SITE)
+	$(STACK_NAME)-tpp-$(RANDOM_SITE)
 	@echo "To check stack run the command:"
 	@echo openstack stack show $(STACK_NAME)-tpp-$(RANDOM_SITE) -c outputs -f shell
 
@@ -50,7 +50,7 @@ e2e_cloud_create:
 	--parameter api_key=$(CLOUDAPIKEY) \
 	--parameter venafi_url=$(CLOUDURL) \
 	--parameter zone=$(CLOUDZONE) \
-	$(STACK_NAME)-fake-$(RANDOM_SITE)
+	$(STACK_NAME)-cloud-$(RANDOM_SITE)
 	@echo "To check stack run the command:"
 	@echo openstack stack show $(STACK_NAME)-cloud-$(RANDOM_SITE) -c outputs -f shell
 
@@ -59,3 +59,8 @@ e2e_show:
 	openstack stack show $(STACK_NAME) -c outputs -f shell
 	openstack stack output show $(STACK_NAME)  venafi_certificate
 	openstack stack output show $(STACK_NAME)  venafi_certificate -c output_value -f shell
+
+publish:
+	rm -rf dist/
+	python3 setup.py sdist bdist_wheel
+	twine upload dist/*
