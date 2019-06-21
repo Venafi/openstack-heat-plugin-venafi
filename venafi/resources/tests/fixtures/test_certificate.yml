@@ -83,12 +83,15 @@ resources:
     properties:
       cloud_config:
         write_files:
-        - path: /etc/apache/certs/server.crt
+        - path: /etc/nginx/certs/server.crt
           content: { get_attr: [venafi_certificate, certificate] }
-        - path: /etc/apache/certs/server.key
+        - path: /etc/nginx/certs/server.key
           content: { get_attr: [venafi_certificate, private_key] }
-        - path: /etc/apache/certs/chain.crt
+        - path: /etc/nginx/certs/chain.crt
           content: { get_attr: [venafi_certificate, chain] }
+        runcmd:
+          - 'echo "nameserver 8.8.8.8" |sudo tee > /etc/resolv.conf'
+          - 'sudo apt-get install -y nginx'
 
   ssl_server_init:
     type: OS::Heat::MultipartMime
