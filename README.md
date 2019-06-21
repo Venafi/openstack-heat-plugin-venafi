@@ -1,32 +1,33 @@
-## Veanfi Heat Plugin
-This plugin is made to request certificate from Venafi Platform or Cloud and save it to the
-Heat resource.
+Venafi HEAT Plugin for OpenStack
+================================
+
+<img src="https://www.venafi.com/sites/default/files/content/body/Light_background_logo.png" width="330px" height="69px"/>
+
+This UNDER DEVELOPMENT solution implements an OpenStack [HEAT plugin](https://wiki.openstack.org/wiki/Heat/Plugins) that uses the [VCert-Python](https://github.com/Venafi/vcert-python) library to simplify certificate enrollment and ensure compliance with enterprise security policy. The plugin is designed to be a used in a HEAT template to request a certificate from [Venafi Platform](https://www.venafi.com/platform/trust-protection-platform) or [Venafi Cloud](https://pki.venafi.com/venafi-cloud/) for a HEAT resource.
 
 ### Installation
-1. Install vcert and venafi-openstack-heat-plugin pip packages on openstack instance:
+1. Add the `vcert` and `openstack-heat-plugin-venafi` pip packages to the OpenStack instance:
 ```bash
-pip install vcert venafi-openstack-heat-plugin
+pip install vcert openstack-heat-plugin-venafi
 ``` 
-2. Create directory /usr/lib/heat
+2. Create the default plugin directory `/usr/lib/heat`
 ```bash
 mkdir -p /usr/lib/heat
 ```
-3. link installed plugin into /usr/lib/heat
+3. Create a symbolic link for the installed plugin in the `/usr/lib/heat` directory
 ```bash
 ln -s $(python -m site --user-site)/venafi-openstack-heat-plugin /usr/lib/heat/
 ``` 
-4. restart heat engine:
+4. Restart the HEAT engine:
 ```bash
 sudo systemctl restart devstack@h-eng
 ```
 
 ### Usage
+Review the provided example YAML [test_certificate.yml](venafi/resources/tests/fixtures/test_certificate.yml).  It is strongly recommended to export credentials as variables and add them as hidden parameters to the stack rather than hardcoding them in your configuration.
 
-You can find example yml resource in [test_certificate.yml](venafi/resources/tests/fixtures/test_certificate.yml)  
-We recommend to export credentials as variables and add them as hidden parameters to the stack.
-
-Venafi Platform example:
-If you want to use trust bundle you have to encode it into base64 string:
+#### For Venafi Platform:
+In most cases you will need to specify a trust bundle because the Venafi Platform is commonly secured using a certificate issued by a private enterprise PKI.  In order to specify a `trust_bundle` you must base64 encode the file contents:
 ```bash
 cat /opt/venafi/bundle.pem |base64 --wrap=10000
 ```
@@ -43,7 +44,7 @@ openstack stack create -t venafi/resources/tests/fixtures/test_certificate.yml \
 venafi-tests-stack-usuu1
 ```
 
-Venafi Cloud example:
+#### For Venafi Cloud:
 ```bash
 openstack stack create -t venafi/resources/tests/fixtures/test_certificate.yml \
 --parameter common_name="cloud-ag1ya.example.com" \
@@ -52,21 +53,21 @@ openstack stack create -t venafi/resources/tests/fixtures/test_certificate.yml \
 --parameter zone=Default
 ```
 
-##### Test instructions:
-1. Contribute into plugin https://github.com/Venafi/venafi-openstack-heat-plugin
-1. Update the plugin on  host:   
+### Testing:
+1. Contribute to the plugin implementation at https://github.com/Venafi/openstack-heat-plugin-venafi
+1. Update the plugin source code on your host:   
 ```
  ssh stack@devstack-manager 
- cd /usr/lib/heat/venafi-openstack-heat-plugin
+ cd /usr/lib/heat/openstack-heat-plugin-venafi
  git pull
  ```
 1. Install necessary dependencies:   
 `pip install -f /usr/lib/heat/venafi-openstack-heat-plugin/requirements.txt`
-1.  Restart heat engine service: `sudo systemctl restart devstack@h-eng`
-1. Try to create  a stack: `openstack stack create --template   ~/devstack/venafi_certificate.yaml venafi_cert_test`
-1. Look into logs: `journalctl -u devstack@h-api.service --since "5 minutes ago"`
+1. Restart HEAT engine service: `sudo systemctl restart devstack@h-eng`
+1. Try to create a stack: `openstack stack create --template ~/devstack/venafi_certificate.yaml venafi_cert_test`
+1. Review the logs: `journalctl -u devstack@h-api.service --since "5 minutes ago"`
 1. Create the test certificate:  
-`openstack stack create --template  /usr/lib/heat/venafi-openstack-heat-plugin/venafi/resources/tests
+`openstack stack create --template /usr/lib/heat/venafi-openstack-heat-plugin/venafi/resources/tests
 /test_venafi_certificate.py venafi_test_cert`
-1. Look into output values:  
+1. Check the output values:  
 `openstack stack show venafi_test_cert -c outputs -f value`
