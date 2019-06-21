@@ -1,9 +1,9 @@
-Venafi HEAT Plugin for OpenStack
+Venafi Heat Plugin for OpenStack
 ================================
 
 <img src="https://www.venafi.com/sites/default/files/content/body/Light_background_logo.png" width="330px" height="69px"/>
 
-This UNDER DEVELOPMENT solution implements an OpenStack [HEAT plugin](https://wiki.openstack.org/wiki/Heat/Plugins) that uses the [VCert-Python](https://github.com/Venafi/vcert-python) library to simplify certificate enrollment and ensure compliance with enterprise security policy. The plugin is designed to be a used in a HEAT template to request a certificate from [Venafi Platform](https://www.venafi.com/platform/trust-protection-platform) or [Venafi Cloud](https://pki.venafi.com/venafi-cloud/) for a HEAT resource.
+This UNDER DEVELOPMENT solution implements an OpenStack [Heat plugin](https://wiki.openstack.org/wiki/Heat/Plugins) that uses the [VCert-Python](https://github.com/Venafi/vcert-python) library to simplify certificate enrollment and ensure compliance with enterprise security policy. The plugin is designed to be a used in a Heat template to request a certificate from [Venafi Platform](https://www.venafi.com/platform/trust-protection-platform) or [Venafi Cloud](https://pki.venafi.com/venafi-cloud/) for a Heat resource.
 
 ### Installation
 1. Add the `vcert` and `openstack-heat-plugin-venafi` pip packages to the OpenStack instance:
@@ -18,7 +18,7 @@ mkdir -p /usr/lib/heat
 ```bash
 ln -s $(python -m site --user-site)/venafi-openstack-heat-plugin /usr/lib/heat/
 ``` 
-4. Restart the HEAT engine:
+4. Restart the Heat engine:
 ```bash
 sudo systemctl restart devstack@h-eng
 ```
@@ -55,18 +55,18 @@ openstack stack create -t venafi/resources/tests/fixtures/test_certificate.yml \
 
 ### Testing:
 1. Contribute to the plugin implementation at https://github.com/Venafi/openstack-heat-plugin-venafi
-1. Update the plugin source code on your host:   
+2. Update the plugin source code on your host:   
 ```
  ssh stack@devstack-manager 
  cd /usr/lib/heat/openstack-heat-plugin-venafi
  git pull
  ```
-1. Install necessary dependencies:   
+3. Install necessary dependencies:   
 `pip install -f /usr/lib/heat/venafi-openstack-heat-plugin/requirements.txt`
-1. Restart HEAT engine service: `sudo systemctl restart devstack@h-eng`
-1. Try to create a stack: `openstack stack create --template ~/devstack/venafi_certificate.yaml venafi_cert_test`
-1. Review the logs: `journalctl -u devstack@h-api.service --since "5 minutes ago"`
-1. Create the test certificate:  
+4. Restart Heat engine service: `sudo systemctl restart devstack@h-eng`
+5. Try to create a stack: `openstack stack create --template ~/devstack/venafi_certificate.yaml venafi_cert_test`
+6. Review the logs: `journalctl -u devstack@h-api.service --since "5 minutes ago"`
+7. Create the test certificate:  
 `openstack stack create --template /usr/lib/heat/venafi-openstack-heat-plugin/venafi/resources/tests
 /test_venafi_certificate.py venafi_test_cert`
 1. Check the output values:  
