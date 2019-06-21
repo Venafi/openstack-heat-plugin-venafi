@@ -47,19 +47,6 @@ parameters:
   save_private_key:
     type: boolean
     default: "true"
-  #Instance params
-  image:
-    type: string
-    default: "bionic-server-cloudimg-amd64"
-  flavor:
-    type: string
-    default: "m1.small"
-  net-id:
-    type: string
-    default: "8b9bb3e8-75f0-4062-88b5-0d03e0bf8ef8"
-  keypair:
-    type: string
-    default: "devstack-manager"
 
 resources:
   venafi_certificate:
@@ -77,40 +64,6 @@ resources:
       save_private_key: { get_param: save_private_key }
       sans:
         { get_param: sans }
-
-  ssl_config:
-    type: OS::Heat::CloudConfig
-    properties:
-      cloud_config:
-        write_files:
-        - path: /etc/nginx/certs/server.crt
-          content: { get_attr: [venafi_certificate, certificate] }
-        - path: /etc/nginx/certs/server.key
-          content: { get_attr: [venafi_certificate, private_key] }
-        - path: /etc/nginx/certs/chain.crt
-          content: { get_attr: [venafi_certificate, chain] }
-        runcmd:
-          - 'echo "nameserver 8.8.8.8" |sudo tee > /etc/resolv.conf'
-          - 'sudo apt-get install -y nginx'
-
-  ssl_server_init:
-    type: OS::Heat::MultipartMime
-    properties:
-      parts:
-      - config: {get_resource: ssl_config}
-
-  ssl_instance:
-    type: OS::Nova::Server
-    properties:
-      image: {get_param: image}
-      flavor: {get_param: flavor}
-      key_name: {get_param: keypair}
-      user_data_format: RAW
-      user_data:
-        get_resource: ssl_server_init
-      networks:
-        - network: {get_param: net-id}
-
 
 outputs:
   venafi_certificate:
