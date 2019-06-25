@@ -23,15 +23,13 @@ from heat.engine import properties
 from heat.engine import resource
 from heat.engine import support
 import time
-import sys
 from os import path
 from errno import ENOENT
 import base64
-from requests import exceptions as rExceptions
 import tempfile
 from oslo_log import log as logging
 
-from vcert import Connection, CertificateRequest, TPPConnection
+from vcert import Connection, CertificateRequest
 
 NOVA_MICROVERSIONS = (MICROVERSION_KEY_TYPE,
                       MICROVERSION_USER) = ('2.2', '2.10')
@@ -268,12 +266,12 @@ class VenafiCertificate(resource.Resource):
         key_size = self.properties[self.KEY_LENGTH]
         zone = self.properties[self.ZONE]
 
-        LOG.info("Creating request with CN %s", common_name)
+        LOG.info("Reading zone config from %s", zone)
         zone_config = self.conn.read_zone_conf(zone)
         request = CertificateRequest(
             common_name=common_name,
         )
-        request.update_from_zone(zone_config)
+        request.update_from_zone_config(zone_config)
         if len(sans) > 0:
             LOG.info("Configuring SANs from list %s",sans)
             for n in sans:
