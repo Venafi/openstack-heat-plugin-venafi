@@ -22,7 +22,7 @@ from setuptools import setup
 import venafi
 
 setup(
-    name='venafi-openstack-heat-plugin',
+    name='openstack-heat-plugin-venafi',
     description='Venafi Inc. OpenStack Heat Plugin',
     license='Apache License, Version 2.0',
     version=venafi.__version__,

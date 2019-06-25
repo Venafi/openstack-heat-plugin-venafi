@@ -52,22 +52,7 @@ openstack stack create -t venafi/resources/tests/fixtures/test_certificate.yml \
 --parameter api_key=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx \
 --parameter zone=Default
 ```
+### ASCIINEMA video:
+[![asciicast](https://asciinema.org/a/l3WfHpViFBhyINI3wY0mEyZkC.svg)](https://asciinema.org/a/l3WfHpViFBhyINI3wY0mEyZkC)
+Also see examples in [Makefile](Makefile)
 
-### Testing:
-1. Contribute to the plugin implementation at https://github.com/Venafi/openstack-heat-plugin-venafi
-2. Update the plugin source code on your host:   
-```
- ssh stack@devstack-manager 
- cd /usr/lib/heat/openstack-heat-plugin-venafi
- git pull
- ```
-3. Install necessary dependencies:   
-`pip install -f /usr/lib/heat/venafi-openstack-heat-plugin/requirements.txt`
-4. Restart Heat engine service: `sudo systemctl restart devstack@h-eng`
-5. Try to create a stack: `openstack stack create --template ~/devstack/venafi_certificate.yaml venafi_cert_test`
-6. Review the logs: `journalctl -u devstack@h-api.service --since "5 minutes ago"`
-7. Create the test certificate:  
-`openstack stack create --template /usr/lib/heat/venafi-openstack-heat-plugin/venafi/resources/tests
-/test_venafi_certificate.py venafi_test_cert`
-1. Check the output values:  
-`openstack stack show venafi_test_cert -c outputs -f value`
