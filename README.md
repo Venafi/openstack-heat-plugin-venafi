@@ -52,4 +52,6 @@ openstack stack create -t venafi/resources/tests/fixtures/test_certificate.yml \
 --parameter zone=Default
 ```
 
+### ASCIINEMA video:
+[![asciicast](https://asciinema.org/a/l3WfHpViFBhyINI3wY0mEyZkC.svg)](https://asciinema.org/a/l3WfHpViFBhyINI3wY0mEyZkC)
 Also see examples in [Makefile](Makefile)
