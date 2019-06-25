@@ -201,9 +201,6 @@ class VenafiCertificate(resource.Resource):
         super(VenafiCertificate, self).__init__(name, json_snippet, stack)
         self._cache = None
         self.conn = self.get_connection()
-        self.ip_addresses = []
-        self.email_addresses = []
-        self.san_dns = []
 
     @property
     def certificate(self):
@@ -272,26 +269,29 @@ class VenafiCertificate(resource.Resource):
             common_name=common_name,
         )
         request.update_from_zone_config(zone_config)
+        ip_addresses = []
+        email_addresses = []
+        san_dns = []
         if len(sans) > 0:
-            LOG.info("Configuring SANs from list %s",sans)
+            LOG.info("Configuring SANs from list %s", sans)
             for n in sans:
                 if n.startswith(("IP:", "IP Address:")):
                     ip = n.split(":", 1)[1]
                     LOG.info("Adding ip %s to ip_addresses", ip)
-                    self.ip_addresses.append(ip)
+                    ip_addresses.append(ip)
                 elif n.startswith("DNS:"):
                     ns = n.split(":", 1)[1]
                     LOG.info("Adding ns %s to san_dns", ns)
-                    self.san_dns.append(ns)
+                    san_dns.append(ns)
                 elif n.startswith("email:"):
                     mail = n.split(":", 1)[1]
                     LOG.info("Adding mail %s to email_addresses", mail)
-                    self.email_addresses.append(mail)
+                    email_addresses.append(mail)
                 else:
                     raise Exception("Failed to determine extension type: %s" % n)
-            request.ip_addresses = self.ip_addresses
-            request.san_dns = self.san_dns
-            request.email_addresses = self.email_addresses
+            request.ip_addresses = ip_addresses
+            request.san_dns = san_dns
+            request.email_addresses = email_addresses
             LOG.info("Request is %s, %s, %s", request.ip_addresses, request.san_dns, request.email_addresses)
 
         if privatekey_passphrase is not None:
