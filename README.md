@@ -1,32 +1,33 @@
-## Veanfi Heat Plugin
-This plugin is made to request certificate from Venafi Platform or Cloud and save it to the
-Heat resource.
+Venafi Heat Plugin for OpenStack
+================================
+
+<img src="https://www.venafi.com/sites/default/files/content/body/Light_background_logo.png" width="330px" height="69px"/>
+
+This UNDER DEVELOPMENT solution implements an OpenStack [Heat plugin](https://wiki.openstack.org/wiki/Heat/Plugins) that uses the [VCert-Python](https://github.com/Venafi/vcert-python) library to simplify certificate enrollment and ensure compliance with enterprise security policy. The plugin is designed to be a used in a Heat template to request a certificate from [Venafi Platform](https://www.venafi.com/platform/trust-protection-platform) or [Venafi Cloud](https://pki.venafi.com/venafi-cloud/) for a Heat resource.
 
 ### Installation
-1. Install vcert and venafi-openstack-heat-plugin pip packages on openstack instance:
+1. Add the `vcert` and `openstack-heat-plugin-venafi` pip packages to the OpenStack instance:
 ```bash
-pip install vcert venafi-openstack-heat-plugin
+pip install vcert openstack-heat-plugin-venafi
 ``` 
-2. Create directory /usr/lib/heat
+2. Create the default plugin directory `/usr/lib/heat`
 ```bash
 mkdir -p /usr/lib/heat
 ```
-3. link installed plugin into /usr/lib/heat
+3. Create a symbolic link for the installed plugin in the `/usr/lib/heat` directory
 ```bash
 ln -s $(python -m site --user-site)/venafi-openstack-heat-plugin /usr/lib/heat/
 ``` 
-4. restart heat engine:
+4. Restart the Heat engine:
 ```bash
 sudo systemctl restart devstack@h-eng
 ```
 
 ### Usage
+Review the provided example YAML [test_certificate.yml](venafi/resources/tests/fixtures/test_certificate.yml).  It is strongly recommended to export credentials as variables and add them as hidden parameters to the stack rather than hardcoding them in your configuration.
 
-You can find example yml resource in [test_certificate.yml](venafi/resources/tests/fixtures/test_certificate.yml)  
-We recommend to export credentials as variables and add them as hidden parameters to the stack.
-
-Venafi Platform example:
-If you want to use trust bundle you have to encode it into base64 string:
+#### For Venafi Platform:
+In most cases you will need to specify a trust bundle because the Venafi Platform is commonly secured using a certificate issued by a private enterprise PKI.  In order to specify a `trust_bundle` you must base64 encode the file contents:
 ```bash
 cat /opt/venafi/bundle.pem |base64 --wrap=10000
 ```
@@ -43,7 +44,7 @@ openstack stack create -t venafi/resources/tests/fixtures/test_certificate.yml \
 venafi-tests-stack-usuu1
 ```
 
-Venafi Cloud example:
+#### For Venafi Cloud:
 ```bash
 openstack stack create -t venafi/resources/tests/fixtures/test_certificate.yml \
 --parameter common_name="cloud-ag1ya.example.com" \
@@ -51,7 +52,7 @@ openstack stack create -t venafi/resources/tests/fixtures/test_certificate.yml \
 --parameter api_key=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx \
 --parameter zone=Default
 ```
-
 ### ASCIINEMA video:
 [![asciicast](https://asciinema.org/a/l3WfHpViFBhyINI3wY0mEyZkC.svg)](https://asciinema.org/a/l3WfHpViFBhyINI3wY0mEyZkC)
 Also see examples in [Makefile](Makefile)
+
