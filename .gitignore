@@ -3,3 +3,5 @@
 credentials
 openrc
 tests/__pycache__
+venafi_openstack_heat_plugin.egg-info/*
+

@@ -31,6 +31,7 @@ import time
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.x509.oid import NameOID
+from cryptography.hazmat.primitives import serialization
 
 PWD = os.path.dirname(os.path.abspath(__file__))
 
@@ -131,21 +132,42 @@ class TestVenafiCertificate:
                 print("Resource not found. Will wait")
                 time.sleep(10)
 
-        cert_output = ''
+        cert_output = None
         for output in stack.outputs:
             if output['output_key'] == 'venafi_certificate':
                 cert_output = output['output_value']
-        if cert_output:
-            cert = x509.load_pem_x509_certificate(cert_output.encode(), default_backend())
-            assert isinstance(cert, x509.Certificate)
-            assert cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME) == [
-                x509.NameAttribute(
-                    NameOID.COMMON_NAME, stack_parameters['common_name']
-                )
-            ]
-            print("Cert is fine:\n", cert_output)
-        else:
+
+        if not cert_output:
             pytest.fail('venafi_certificate not found in output_value')
+
+        cert = x509.load_pem_x509_certificate(cert_output.encode(), default_backend())
+        assert isinstance(cert, x509.Certificate)
+        assert cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME) == [
+            x509.NameAttribute(
+                NameOID.COMMON_NAME, stack_parameters['common_name']
+            )
+        ]
+        print("Cert is fine:\n", cert_output)
+
+        pkey_output = None
+        for output in stack.outputs:
+            if output['output_key'] == 'venafi_pkey':
+                pkey_output = output['output_value']
+
+        if not pkey_output:
+            pytest.fail('venafi_private key not found in output_value')
+
+        pkey = serialization.load_pem_private_key(pkey_output.encode(), password=None, backend=default_backend())
+
+        pkey_public_key_pem = pkey.public_key().public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo
+        )
+        cert_public_key_pem = cert.public_key().public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo
+        )
+        assert pkey_public_key_pem == cert_public_key_pem
 
     # Testing random string template to check that Heat is operating normally.
     def test_random_string(self):
