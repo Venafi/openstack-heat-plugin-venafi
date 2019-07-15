@@ -275,15 +275,15 @@ class VenafiCertificate(resource.Resource):
         if len(sans) > 0:
             LOG.info("Configuring SANs from list %s", sans)
             for n in sans:
-                if n.startswith(("IP:", "IP Address:")):
+                if n.lower().startswith(("ip:", "ip address:")):
                     ip = n.split(":", 1)[1]
                     LOG.info("Adding ip %s to ip_addresses", ip)
                     ip_addresses.append(ip)
-                elif n.startswith("DNS:"):
+                elif n.lower().startswith("dns:"):
                     ns = n.split(":", 1)[1]
                     LOG.info("Adding ns %s to san_dns", ns)
                     san_dns.append(ns)
-                elif n.startswith("email:"):
+                elif n.lower().startswith("email:"):
                     mail = n.split(":", 1)[1]
                     LOG.info("Adding mail %s to email_addresses", mail)
                     email_addresses.append(mail)
