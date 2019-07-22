@@ -235,23 +235,25 @@ class VenafiCertificate(resource.Resource):
             LOG.info("Fake is %s. Will use fake connection", fake)
         trust_bundle = self.properties[self.TRUST_BUNDLE]
 
-        if trust_bundle:
-            try:
-                decoded_bundle = base64.b64decode(trust_bundle)
-            except:
-                LOG.info("Trust bundle %s is not base64 encoded string. Considering it's a file", trust_bundle)
-                if not path.isfile(trust_bundle):
-                    raise IOError(ENOENT, 'Not a file', trust_bundle)
-            else:
-                tmp_dir = tempfile.gettempdir()
+        if not trust_bundle:
+            return Connection(url, token, user, password, fake=fake)
 
-                f = open(path.join(tmp_dir,'venafi-temp-trust-bundle.pem'),"w+")
-                LOG.info("Saving decoded trust bundle to temp file %s", f.name)
-                f.write(decoded_bundle)
-                f.close()
-                trust_bundle = f.name
-            return Connection(url, token, user, password, http_request_kwargs={"verify": trust_bundle}, fake=fake)
-        return Connection(url, token, user, password, fake=fake)
+        try:
+            decoded_bundle = base64.b64decode(trust_bundle)
+        except:
+            LOG.info("Trust bundle %s is not base64 encoded string. Considering it's a file", trust_bundle)
+            if not path.isfile(trust_bundle):
+                raise IOError(ENOENT, 'Not a file', trust_bundle)
+        else:
+            tmp_dir = tempfile.gettempdir()
+
+            f = open(path.join(tmp_dir, 'venafi-temp-trust-bundle.pem'), "w+")
+            LOG.info("Saving decoded trust bundle to temp file %s", f.name)
+            f.write(decoded_bundle)
+            f.close()
+            trust_bundle = f.name
+        return Connection(url, token, user, password, http_request_kwargs={"verify": trust_bundle}, fake=fake)
+
 
     def enroll(self):
         LOG.info("Running enroll")
@@ -307,17 +309,16 @@ class VenafiCertificate(resource.Resource):
             request.key_length = key_size
 
         self.conn.request_cert(request, zone)
-
+        t = time.time()
         while True:
             LOG.info("Trying to retrieve certificate")
-            cert = self.conn.retrieve_cert(request)  # vcert.Certificate
-            if cert:
+            cert = self.conn.retrieve_cert(request)  # type: vcert.Certificate
+            if cert or time.time() > t + 600:
                 break
             else:
                 time.sleep(5)
         LOG.info("Got certificate: %s", cert.cert)
         LOG.info("Got chain: %s", cert.chain)
-        LOG.info("Got pkey: %s", request.private_key_pem)
         return {self.CHAIN_ATTR: cert.chain, self.CERTIFICATE_ATTR: cert.cert,
                 self.PRIVATE_KEY_ATTR: request.private_key_pem, self.CSR_ATTR: request.csr}
 
