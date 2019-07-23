@@ -132,6 +132,10 @@ class TestVenafiCertificate:
                 print("Resource not found. Will wait")
                 time.sleep(10)
 
+        # Wait until cloud cert enrolled
+        if "cloud" in stack_name:
+            time.sleep(100)
+
         cert_output = None
         for output in stack.outputs:
             if output['output_key'] == 'venafi_certificate':
@@ -199,7 +203,7 @@ class TestVenafiCertificate:
     def test_cloud_enroll_cert(self):
         cn = randomString(10) + '-cloud.venafi.example.com'
         stack_parameters = {'common_name': cn,
-                            # 'sans': ["DNS:www.venafi.example.com","DNS:m.venafi.example.com"],
+                            'sans': ["DNS:www.venafi.example.com","DNS:m.venafi.example.com"],
                             'api_key': os.environ['CLOUDAPIKEY'],
                             'venafi_url': os.environ['CLOUDURL'],
                             'zone': os.environ['CLOUDZONE'],
