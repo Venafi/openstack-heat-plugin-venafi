@@ -331,7 +331,7 @@ class VenafiCertificate(resource.Resource):
         if len(chain) > 0:
             LOG.info("Saving to data chain: %s", chain)
             self.data_set('chain', chain, redact=False)
-        LOG.info("Saving to data private_key: %s", self._cache[self.PRIVATE_KEY_ATTR])
+        LOG.info("Saving to data private_key.")
         self.data_set('private_key', self._cache[self.PRIVATE_KEY_ATTR], redact=False)
         LOG.info("Saving CSR to data")
         self.data_set('csr', self._cache[self.CSR_ATTR], redact=False)
