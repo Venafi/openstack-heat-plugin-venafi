@@ -113,10 +113,12 @@ class TestVenafiCertificate:
             pytest.fail("No output values found")
         else:
             print(stack.outputs)
-        return stack, client
+        return stack_name, client
 
     def _venafi_enroll(self, stack_name, stack_parameters, timeout):
-        stack, client = self._prepare_tests("test_certificate_output_only.yml",stack_name , stack_parameters)
+        stack_randomized_name, client = self._prepare_tests("test_certificate_output_only.yml",stack_name ,
+                                                        stack_parameters)
+        stack = client.stacks.get(stack_randomized_name)
         timeout = time.time() + timeout
         while True:
             res = client.resources.get(stack.id, 'venafi_certificate')
@@ -132,10 +134,8 @@ class TestVenafiCertificate:
                 print("Resource not found. Will wait")
                 time.sleep(10)
 
-        # Wait until cloud cert enrolled
-        if "cloud" in stack_name:
-            time.sleep(100)
-
+        #recreating stack object with normal outputs
+        stack = client.stacks.get(stack_randomized_name)
         cert_output = None
         for output in stack.outputs:
             if output['output_key'] == 'venafi_certificate':
