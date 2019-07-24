@@ -174,8 +174,8 @@ class TestVenafiCertificate:
         assert pkey_public_key_pem == cert_public_key_pem
 
     # Testing random string template to check that Heat is operating normally.
-    def test_random_string(self):
-        self._prepare_tests("random_string.yml", 'random_string_stack_', None)
+    # def test_random_string(self):
+    #     self._prepare_tests("random_string.yml", 'random_string_stack_', None)
 
     # def test_venafi_fake_cert(self):
     #     cn = randomString(10) + '-fake.cert.example.com'
@@ -184,9 +184,9 @@ class TestVenafiCertificate:
     #                                  "email:test@venafi.com","IP Address:192.168.2.2"],
     #                         'fake': 'true',
     #                         'zone': 'fake'}
-
-        stack_name = 'fake_cert_stack_'
-        self._venafi_enroll(stack_name, stack_parameters, 30)
+    #
+    #     stack_name = 'fake_cert_stack_'
+    #     self._venafi_enroll(stack_name, stack_parameters, 30)
 
     def test_tpp_enroll_cert(self):
         cn = randomString(10) + '-tpp.venafi.example.com'
