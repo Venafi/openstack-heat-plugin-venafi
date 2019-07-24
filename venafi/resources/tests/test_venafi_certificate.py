@@ -177,12 +177,14 @@ class TestVenafiCertificate:
     def test_random_string(self):
         self._prepare_tests("random_string.yml", 'random_string_stack_', None)
 
-    def test_venafi_fake_cert(self):
-        cn = randomString(10) + '-fake.cert.example.com'
-        stack_parameters = {'common_name': cn,
-                            'sans': ["IP:192.168.1.1","DNS:www.venafi.example.com","DNS:m.venafi.example.com",
-                                     "email:test@venafi.com","IP Address:192.168.2.2"],
-                            'fake': 'true'}
+    # def test_venafi_fake_cert(self):
+    #     cn = randomString(10) + '-fake.cert.example.com'
+    #     stack_parameters = {'common_name': cn,
+    #                         'sans': ["IP:192.168.1.1","DNS:www.venafi.example.com","DNS:m.venafi.example.com",
+    #                                  "email:test@venafi.com","IP Address:192.168.2.2"],
+    #                         'fake': 'true',
+    #                         'zone': 'fake'}
+
         stack_name = 'fake_cert_stack_'
         self._venafi_enroll(stack_name, stack_parameters, 30)
 
