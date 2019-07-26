@@ -59,3 +59,10 @@ openstack stack create -t venafi/resources/tests/fixtures/test_certificate.yml \
 [![asciicast](https://asciinema.org/a/l3WfHpViFBhyINI3wY0mEyZkC.svg)](https://asciinema.org/a/l3WfHpViFBhyINI3wY0mEyZkC)
 Also see examples in [Makefile](Makefile)
 
+## License
+
+Copyright &copy; Venafi, Inc. All rights reserved.
+
+This solution is licensed under the Apache License, Version 2.0. See `LICENSE` for the full license text.
+
+Please direct questions/comments to opensource@venafi.com.
