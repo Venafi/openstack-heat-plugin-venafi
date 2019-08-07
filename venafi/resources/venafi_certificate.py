@@ -108,12 +108,12 @@ class VenafiCertificate(resource.Resource):
         ),
         KEY_PASSWORD: properties.Schema(
             properties.Schema.STRING,
-            _("Cryptography key password"),
+            _("Encrypted private key password"),
             default=None,
         ),
         KEY_TYPE: properties.Schema(
             properties.Schema.STRING,
-            _("Cryptography key type"),
+            _("Cryptographic key type"),
             default="RSA",
             constraints=[constraints.AllowedValues(("RSA", "ECDSA"))],
         ),
@@ -125,7 +125,7 @@ class VenafiCertificate(resource.Resource):
         ),
         KEY_CURVE: properties.Schema(
             properties.Schema.STRING,
-            _("Key curve (only for ecdsa key_type)"),
+            _("Key eliptica curve (only for ecdsa key_type)"),
             default="p521",
             constraints=[constraints.AllowedValues(("p521", "p256", "p224", "p384"))],
         ),
@@ -165,7 +165,7 @@ class VenafiCertificate(resource.Resource):
         ),
         TRUST_BUNDLE: properties.Schema(
             properties.Schema.STRING,
-            _("Path to server certificate trust bundle")
+            _("Path to server certificate trust bundle or base64 encoded trust bundle certificate.")
         ),
         FAKE: properties.Schema(
             properties.Schema.BOOLEAN,
@@ -283,7 +283,7 @@ class VenafiCertificate(resource.Resource):
                     ip_addresses.append(ip)
                 elif n.lower().startswith("dns:"):
                     ns = n.split(":", 1)[1]
-                    LOG.info("Adding ns %s to san_dns", ns)
+                    LOG.info("Adding domain name %s to san_dns", ns)
                     san_dns.append(ns)
                 elif n.lower().startswith("email:"):
                     mail = n.split(":", 1)[1]
@@ -331,7 +331,7 @@ class VenafiCertificate(resource.Resource):
         if len(chain) > 0:
             LOG.info("Saving to data chain: %s", chain)
             self.data_set('chain', chain, redact=False)
-        LOG.info("Saving to data private_key: %s", self._cache[self.PRIVATE_KEY_ATTR])
+        LOG.info("Saving to data private_key.")
         self.data_set('private_key', self._cache[self.PRIVATE_KEY_ATTR], redact=False)
         LOG.info("Saving CSR to data")
         self.data_set('csr', self._cache[self.CSR_ATTR], redact=False)

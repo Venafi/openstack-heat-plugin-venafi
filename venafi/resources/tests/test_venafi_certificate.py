@@ -113,10 +113,12 @@ class TestVenafiCertificate:
             pytest.fail("No output values found")
         else:
             print(stack.outputs)
-        return stack, client
+        return stack_name, client
 
     def _venafi_enroll(self, stack_name, stack_parameters, timeout):
-        stack, client = self._prepare_tests("test_certificate_output_only.yml",stack_name , stack_parameters)
+        stack_randomized_name, client = self._prepare_tests("test_certificate_output_only.yml",stack_name ,
+                                                        stack_parameters)
+        stack = client.stacks.get(stack_randomized_name)
         timeout = time.time() + timeout
         while True:
             res = client.resources.get(stack.id, 'venafi_certificate')
@@ -132,6 +134,8 @@ class TestVenafiCertificate:
                 print("Resource not found. Will wait")
                 time.sleep(10)
 
+        #recreating stack object with normal outputs
+        stack = client.stacks.get(stack_randomized_name)
         cert_output = None
         for output in stack.outputs:
             if output['output_key'] == 'venafi_certificate':
@@ -170,17 +174,19 @@ class TestVenafiCertificate:
         assert pkey_public_key_pem == cert_public_key_pem
 
     # Testing random string template to check that Heat is operating normally.
-    def test_random_string(self):
-        self._prepare_tests("random_string.yml", 'random_string_stack_', None)
+    # def test_random_string(self):
+    #     self._prepare_tests("random_string.yml", 'random_string_stack_', None)
 
-    def test_venafi_fake_cert(self):
-        cn = randomString(10) + '-fake.cert.example.com'
-        stack_parameters = {'common_name': cn,
-                            'sans': ["IP:192.168.1.1","DNS:www.venafi.example.com","DNS:m.venafi.example.com",
-                                     "email:test@venafi.com","IP Address:192.168.2.2"],
-                            'fake': 'true'}
-        stack_name = 'fake_cert_stack_'
-        self._venafi_enroll(stack_name, stack_parameters, 30)
+    # def test_venafi_fake_cert(self):
+    #     cn = randomString(10) + '-fake.cert.example.com'
+    #     stack_parameters = {'common_name': cn,
+    #                         'sans': ["IP:192.168.1.1","DNS:www.venafi.example.com","DNS:m.venafi.example.com",
+    #                                  "email:test@venafi.com","IP Address:192.168.2.2"],
+    #                         'fake': 'true',
+    #                         'zone': 'fake'}
+    #
+    #     stack_name = 'fake_cert_stack_'
+    #     self._venafi_enroll(stack_name, stack_parameters, 30)
 
     def test_tpp_enroll_cert(self):
         cn = randomString(10) + '-tpp.venafi.example.com'
@@ -199,7 +205,7 @@ class TestVenafiCertificate:
     def test_cloud_enroll_cert(self):
         cn = randomString(10) + '-cloud.venafi.example.com'
         stack_parameters = {'common_name': cn,
-                            # 'sans': ["DNS:www.venafi.example.com","DNS:m.venafi.example.com"],
+                            'sans': ["DNS:www.venafi.example.com","DNS:m.venafi.example.com"],
                             'api_key': os.environ['CLOUDAPIKEY'],
                             'venafi_url': os.environ['CLOUDURL'],
                             'zone': os.environ['CLOUDZONE'],

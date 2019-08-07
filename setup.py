@@ -26,10 +26,10 @@ setup(
     version=u"0.0.7",
     author='Venafi Inc.',
     author_email='opensource@venafi.com',
-    url='https://github.com/Venafi/venafi-openstack-heat-plugins/',
+    url='https://github.com/Venafi/openstack-heat-plugin-venafi',
     keywords=['venafi', 'openstack', 'heat', 'ssl', 'certificates'],
     install_requires=[
-        'vcert>=0.6.0'
+        'vcert >= 0.6.1'
     ],
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
