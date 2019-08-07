@@ -18,13 +18,12 @@
 from __future__ import absolute_import, print_function, unicode_literals
 from setuptools import setup
 
-import venafi
 
 setup(
     name='openstack-heat-plugin-venafi',
     description='Venafi Inc. OpenStack Heat Plugin',
     license='Apache License, Version 2.0',
-    version=venafi.__version__,
+    version=u"0.0.7",
     author='Venafi Inc.',
     author_email='opensource@venafi.com',
     url='https://github.com/Venafi/openstack-heat-plugin-venafi',
