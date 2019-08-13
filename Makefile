@@ -62,6 +62,7 @@ e2e_show:
 
 package:
 	rm -rf dist/
+	rm -rf openstack_heat_plugin_venafi.egg-info
 	python3 setup.py sdist bdist_wheel
 
 upload:

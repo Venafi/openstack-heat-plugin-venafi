@@ -29,7 +29,7 @@ setup(
     author_email='opensource@venafi.com',
     url='https://github.com/Venafi/openstack-heat-plugin-venafi',
     keywords=['venafi', 'openstack', 'heat', 'ssl', 'certificates'],
-    packages=find_packages(exclude='tests'),
+    packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     install_requires=[
         'vcert >= 0.6.1'
     ],
