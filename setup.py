@@ -24,7 +24,7 @@ setup(
     description='Venafi Inc. OpenStack Heat Plugin',
     long_description='Venafi Inc. OpenStack Heat Plugin',
     license='Apache License, Version 2.0',
-    version=u"0.0.10",
+    version=u"0.0.11",
     author='Venafi Inc.',
     author_email='opensource@venafi.com',
     url='https://github.com/Venafi/openstack-heat-plugin-venafi',
