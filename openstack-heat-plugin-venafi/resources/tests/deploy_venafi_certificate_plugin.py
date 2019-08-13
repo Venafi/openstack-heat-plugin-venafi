@@ -10,7 +10,7 @@ os.system('rsync --delete --exclude ".git" --exclude ".venv" --exclude ".idea" -
           '"*.pyc" '
           '-pthrvz  '
           ''+pwd+
-          '/../../../../venafi-openstack-heat-plugin '+os.environ['DEVSTACK_USER']+'@'+os.environ[
+          '/../../../../openstack-heat-plugin-venafi '+os.environ['DEVSTACK_USER']+'@'+os.environ[
               'DEVSTACK_HOST']+':/usr/lib/heat')
 result = c.run('sudo systemctl restart devstack@h-eng')
 print(msg.format(result))
