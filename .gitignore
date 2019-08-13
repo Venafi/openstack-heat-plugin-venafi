@@ -5,3 +5,5 @@ openrc
 tests/__pycache__
 openstack_heat_plugin_venafi.egg-info
 dist
+build
+openstack-heat-plugin-venafi/__pycache__/

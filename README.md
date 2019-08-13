@@ -24,11 +24,11 @@ for your openstack installation.
     ```
 1. Create a symbolic link for the installed plugin in the `/usr/lib/heat` directory
     ```bash
-    ln -s <python dist-packages directory>/venafi-openstack-heat-plugin /usr/lib/heat/
+    ln -s $(pip show openstack-heat-plugin-venafi | awk '/^Location:/{print $2}')/openstack-heat-plugin-venafi /usr/lib/heat/
     ``` 
 1. Restart the Heat engine:
     ```bash
-    sudo systemctl restart devstack@h-eng
+    sudo systemctl restart openstack-heat-engine.service
     ```
 
 ### Usage
