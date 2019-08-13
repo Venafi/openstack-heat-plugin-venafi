@@ -17,18 +17,19 @@
 
 from __future__ import absolute_import, print_function, unicode_literals
 from setuptools import setup
-from venafi import __version__
+from setuptools import find_packages
 
 setup(
     name='openstack-heat-plugin-venafi',
     description='Venafi Inc. OpenStack Heat Plugin',
+    long_description='Venafi Inc. OpenStack Heat Plugin',
     license='Apache License, Version 2.0',
-    version=__version__,
+    version=u"0.0.10",
     author='Venafi Inc.',
     author_email='opensource@venafi.com',
     url='https://github.com/Venafi/openstack-heat-plugin-venafi',
     keywords=['venafi', 'openstack', 'heat', 'ssl', 'certificates'],
-    packages=['venafi'],
+    packages=find_packages(exclude='tests'),
     install_requires=[
         'vcert >= 0.6.1'
     ],
