@@ -6,22 +6,30 @@ Venafi Heat Plugin for OpenStack
 This UNDER DEVELOPMENT solution implements an OpenStack [Heat plugin](https://wiki.openstack.org/wiki/Heat/Plugins) that uses the [VCert-Python](https://github.com/Venafi/vcert-python) library to simplify certificate enrollment and ensure compliance with enterprise security policy. The plugin is designed to be a used in a Heat template to request a certificate from [Venafi Platform](https://www.venafi.com/platform/trust-protection-platform) or [Venafi Cloud](https://pki.venafi.com/venafi-cloud/) for a Heat resource.
 
 ### Installation
+You should install pip packages into same python python which is used by heat-engine. Instructions may be different 
+for your openstack installation.
+1. Switch to openstack user
+
+1. Determine python dist-package directory
+   ```bash
+    python -m site
+    ```
 1. Add the `vcert` and `openstack-heat-plugin-venafi` pip packages to the OpenStack instance:
-```bash
-pip install openstack-heat-plugin-venafi
-``` 
-2. Create the default plugin directory `/usr/lib/heat`
-```bash
-mkdir -p /usr/lib/heat
-```
-3. Create a symbolic link for the installed plugin in the `/usr/lib/heat` directory
-```bash
-ln -s $(python -m site --user-site)/venafi-openstack-heat-plugin /usr/lib/heat/
-``` 
-4. Restart the Heat engine:
-```bash
-sudo systemctl restart devstack@h-eng
-```
+    ```bash
+    pip install openstack-heat-plugin-venafi
+    ``` 
+1. Create the default plugin directory `/usr/lib/heat`
+    ```bash
+    mkdir -p /usr/lib/heat
+    ```
+1. Create a symbolic link for the installed plugin in the `/usr/lib/heat` directory
+    ```bash
+    ln -s <python dist-packages directory>/venafi-openstack-heat-plugin /usr/lib/heat/
+    ``` 
+1. Restart the Heat engine:
+    ```bash
+    sudo systemctl restart devstack@h-eng
+    ```
 
 ### Usage
 Review the provided example YAML [test_certificate.yml](venafi/resources/tests/fixtures/test_certificate.yml).  It is strongly recommended to export credentials as variables and add them as hidden parameters to the stack rather than hardcoding them in your configuration.
