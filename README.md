@@ -27,14 +27,14 @@ for your openstack installation.
 
 1. Determine pip packages location. For example:
     ```bash
-    PIP_DIR=$(pip show openstack-heat-plugin-venafi | awk '/^Location:/{print $2}')
+    PIP_PKG_LOC=$(pip show openstack-heat-plugin-venafi | awk '/^Location:/{print $2}')
     ```
 
 1. Check that it have openstack-heat-plugin-venafi folder.
  
 1. Create a symbolic link for the installed plugin in the `/usr/lib/heat` directory
     ```bash
-    ln -s ${PIP_DIR}/openstack-heat-plugin-venafi /usr/lib/heat/
+    ln -s ${PIP_PKG_LOC}/openstack-heat-plugin-venafi /usr/lib/heat/
     ```
  
 1. Restart the Heat engine:
