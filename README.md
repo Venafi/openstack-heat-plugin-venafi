@@ -72,7 +72,7 @@ openstack stack create -t venafi/resources/tests/fixtures/test_certificate.yml \
 --parameter common_name="cloud-ag1ya.example.com" \
 --parameter sans="DNS:www.venafi.example.com","DNS:m.venafi.example.com" \
 --parameter api_key=${CLOUD_APIKEY} \
---parameter zone=xxxxxxxxx
+--parameter zone="zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz"
 ```
 
 ##### ASCIINEMA video:
