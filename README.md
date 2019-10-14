@@ -66,12 +66,13 @@ venafi-tests-stack-usuu1
 [![asciicast](https://asciinema.org/a/68jJnqif98QYI4Acn3ot323xt.svg)](https://asciinema.org/a/68jJnqif98QYI4Acn3ot323xt)
 
 #### For Venafi Cloud:
+Get the Zone ID value to use from the Venafi Cloud UI.
 ```bash
 openstack stack create -t venafi/resources/tests/fixtures/test_certificate.yml \
 --parameter common_name="cloud-ag1ya.example.com" \
 --parameter sans="DNS:www.venafi.example.com","DNS:m.venafi.example.com" \
 --parameter api_key=${CLOUD_APIKEY} \
---parameter zone=Default
+--parameter zone=xxxxxxxxx
 ```
 
 ##### ASCIINEMA video:
