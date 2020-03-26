@@ -50,7 +50,7 @@ for your openstack installation.
     ```
 
 ### Usage
-Review the provided example YAML [test_certificate.yml](venafi/resources/tests/fixtures/test_certificate.yml).  It is strongly recommended to export credentials as variables and add them as hidden parameters to the stack rather than hardcoding them in your configuration.
+Review the provided example YAML [test_certificate.yml](openstack-heat-plugin-venafi/resources/tests/fixtures/test_certificate.yml).  It is strongly recommended to export credentials as variables and add them as hidden parameters to the stack rather than hardcoding them in your configuration.
 
 #### For Venafi Platform:
 In most cases you will need to specify a trust bundle because the Venafi Platform is commonly secured using a certificate issued by a private enterprise PKI.  In order to specify a `trust_bundle` you must base64 encode the file contents:
