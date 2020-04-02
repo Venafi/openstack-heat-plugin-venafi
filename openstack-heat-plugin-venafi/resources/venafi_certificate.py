@@ -108,7 +108,7 @@ class VenafiCertificate(resource.Resource):
         ),
         KEY_PASSWORD: properties.Schema(
             properties.Schema.STRING,
-            _("Encrypted private key password"),
+            _("Password for encrypting private key"),
             default=None,
         ),
         KEY_TYPE: properties.Schema(
@@ -125,7 +125,7 @@ class VenafiCertificate(resource.Resource):
         ),
         KEY_CURVE: properties.Schema(
             properties.Schema.STRING,
-            _("Key eliptica curve (only for ecdsa key_type)"),
+            _("Key elliptic curve (only for ECDSA key_type)"),
             default="p521",
             constraints=[constraints.AllowedValues(("p521", "p256", "p224", "p384"))],
         ),
