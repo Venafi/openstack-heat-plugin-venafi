@@ -269,6 +269,7 @@ class VenafiCertificate(resource.Resource):
         zone_config = self.conn.read_zone_conf(zone)
         request = CertificateRequest(
             common_name=common_name,
+            origin="OpenStack"
         )
         request.update_from_zone_config(zone_config)
         ip_addresses = []
