@@ -29,7 +29,7 @@ import base64
 import tempfile
 from oslo_log import log as logging
 
-from vcert import Connection, CertificateRequest
+from vcert import Connection, CertificateRequest, KeyType
 
 NOVA_MICROVERSIONS = (MICROVERSION_KEY_TYPE,
                       MICROVERSION_USER) = ('2.2', '2.10')
@@ -301,13 +301,7 @@ class VenafiCertificate(resource.Resource):
             request.key_password = privatekey_passphrase
 
         if privatekey_type:
-            key_type = {"RSA": "rsa", "ECDSA": "ec", "EC": "ec"}.get(privatekey_type)
-            if not key_type:
-                raise Exception("Failed to determine key type: %s. "
-                                "Must be RSA or ECDSA" % privatekey_type)
-            request.key_type = key_type
-            request.key_curve = curve
-            request.key_length = key_size
+            request.key_type = KeyType(privatekey_type, key_size or curve)
 
         self.conn.request_cert(request, zone)
         t = time.time()
