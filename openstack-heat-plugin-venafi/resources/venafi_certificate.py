@@ -29,7 +29,7 @@ import base64
 import tempfile
 from oslo_log import log as logging
 
-from vcert import Connection, CertificateRequest, KeyType
+from vcert import Connection, CertificateRequest, KeyType, venafi_connection
 
 NOVA_MICROVERSIONS = (MICROVERSION_KEY_TYPE,
                       MICROVERSION_USER) = ('2.2', '2.10')
@@ -58,7 +58,8 @@ class VenafiCertificate(resource.Resource):
         TPP_PASSWORD,
         API_KEY,
         TRUST_BUNDLE,
-        FAKE
+        FAKE,
+        ACCESS_TOKEN
     ) = (
         'name',
         'common_name',
@@ -74,7 +75,8 @@ class VenafiCertificate(resource.Resource):
         'tpp_password',
         'api_key',
         'trust_bundle',
-        'fake'
+        'fake',
+        'access_token'
     )
 
     ATTRIBUTES = (
@@ -171,6 +173,10 @@ class VenafiCertificate(resource.Resource):
             properties.Schema.BOOLEAN,
             _("Use fake testong connection if true"),
             default=False
+        ),
+        ACCESS_TOKEN: properties.Schema(
+            properties.Schema.STRING,
+            _("Access token for TPP, user should use this for authentication")
         )
     }
 
@@ -231,12 +237,21 @@ class VenafiCertificate(resource.Resource):
         password = self.properties[self.TPP_PASSWORD]
         token = self.properties[self.API_KEY]
         fake = self.properties[self.FAKE]
+        access_token = self.properties[self.ACCESS_TOKEN]
         if fake:
             LOG.info("Fake is %s. Will use fake connection", fake)
         trust_bundle = self.properties[self.TRUST_BUNDLE]
 
         if not trust_bundle:
-            return Connection(url, token, user, password, fake=fake)
+            if access_token and access_token != "":
+                return venafi_connection(
+                    url=url, user=None, password=None,
+                    access_token=access_token,
+                    refresh_token=None,
+                    http_request_kwargs=None,
+                    api_key=None, fake=fake)
+            else:
+                return Connection(url, token, user, password, fake=fake)
 
         try:
             decoded_bundle = base64.b64decode(trust_bundle)
@@ -247,12 +262,20 @@ class VenafiCertificate(resource.Resource):
         else:
             tmp_dir = tempfile.gettempdir()
 
-            f = open(path.join(tmp_dir, 'venafi-temp-trust-bundle.pem'), "w+")
+            f = open(path.join(tmp_dir, 'venafi-temp-trust-bundle.pem'), "wb")
             LOG.info("Saving decoded trust bundle to temp file %s", f.name)
             f.write(decoded_bundle)
             f.close()
             trust_bundle = f.name
-        return Connection(url, token, user, password, http_request_kwargs={"verify": trust_bundle}, fake=fake)
+        if access_token and access_token != "":
+                return venafi_connection(
+                url=url, user=None, password=None,
+                access_token=access_token,
+                refresh_token=None,
+                http_request_kwargs={"verify": trust_bundle},
+                api_key=None, fake=fake)
+        else:
+            return Connection(url, token, user, password, http_request_kwargs={"verify": trust_bundle}, fake=fake)
 
 
     def enroll(self):

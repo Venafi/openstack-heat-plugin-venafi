@@ -25,7 +25,7 @@ docutils==0.14
 dogpile.cache==0.7.1
 eventlet==0.24.1
 extras==1.0.0
-fabric==2.4.0
+fabric3
 fasteners==0.15
 fixtures==3.0.0
 futurist==1.8.1
