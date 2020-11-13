@@ -5,9 +5,9 @@ from fabric.api import *
 from fabric.contrib.files import exists
 from invoke import UnexpectedExit
 
-env.hosts = '192.168.4.99'
+env.hosts = os.environ['DEVSTACK_HOST']
 
-# Set the username  git clone -b add-origins --single-branch https://github.com/Venafi/openstack-heat-plugin-venafi.git
+# Set the username
 env.user = os.environ['HOST_USER_NAME']
 env.password =os.environ['HOST_USER_PASSWORD']
 branchName = os.environ['BRANCH_NAME']

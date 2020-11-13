@@ -80,11 +80,11 @@ class TestVenafiCertificate:
     def _prepare_tests(self, fixture, stack_name, stack_parameters):
         kwargs = {
             'auth_url': os.environ['OS_AUTH_URL'],
-            'username': 'admin',
+            'username': os.environ['OPENSTACK_USER'],
             'password': os.environ['OS_PASSWORD'],
-            'project_name': 'alt_demo',
-            'user_domain_name': 'default',
-            'project_domain_name': 'default'
+            'project_name': os.environ['OPENSTACK_PROJECT'],
+            'user_domain_name': os.environ['OPENSTACK_USER_DOMAIN'],
+            'project_domain_name': os.environ['OPENSTACK_PROJECT_DOMAIN'],
         }
 
         loader = loading.get_plugin_loader('password')
@@ -216,7 +216,7 @@ class TestVenafiCertificate:
         self._venafi_enroll(stack_name, stack_parameters, 240)
 
     def test_cloud_enroll_cert(self):
-        cn = "amoo60.example.com"#randomString(10) + '-cloud.venafi.example.com'
+        cn = randomString(10) + '-cloud.venafi.example.com'
         stack_parameters = {'common_name': cn,
                             'sans': ["DNS:www.venafi.example.com","DNS:m.venafi.example.com" ],
                             'api_key': os.environ['CLOUDAPIKEY'],
