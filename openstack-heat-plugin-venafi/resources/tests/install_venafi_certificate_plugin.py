@@ -14,9 +14,6 @@ branchName = os.environ['BRANCH_NAME']
 localBranchFolder = os.environ['BRANCH_FOLDER']
 
 
-def host_type():
-    run('uname -s')
-
 def checkoutProjectAndInstall():
     with cd(localBranchFolder):
         if exists(localBranchFolder+"openstack-heat-venafi"):
