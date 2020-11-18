@@ -79,9 +79,9 @@ class TestVenafiCertificate:
 
     def _prepare_tests(self, fixture, stack_name, stack_parameters):
         kwargs = {
-            'auth_url': os.environ['OS_AUTH_URL'],
+            'auth_url': os.environ['OPENSTACK_AUTH_URL'],
             'username': os.environ['OPENSTACK_USER'],
-            'password': os.environ['OS_PASSWORD'],
+            'password': os.environ['OPENSTACK_PASSWORD'],
             'project_name': os.environ['OPENSTACK_PROJECT'],
             'user_domain_name': os.environ['OPENSTACK_USER_DOMAIN'],
             'project_domain_name': os.environ['OPENSTACK_PROJECT_DOMAIN'],
