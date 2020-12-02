@@ -10,7 +10,8 @@ env.hosts = os.environ['DEVSTACK_HOST']
 # Set the username
 env.user = os.environ['HOST_USER_NAME']
 env.password =os.environ['HOST_USER_PASSWORD']
-branchName = os.environ['BRANCH_NAME']
+branchName = os.environ['BRANCH']
+repo = os.environ["GIT_REPO"]
 localBranchFolder = os.environ['BRANCH_FOLDER']
 
 
@@ -20,7 +21,7 @@ def checkoutProjectAndInstall():
             run("rm -rf openstack-heat-venafi")
         run("mkdir openstack-heat-venafi")
         with cd("openstack-heat-venafi"):
-            run("git clone -b "+branchName+" --single-branch https://github.com/Venafi/openstack-heat-plugin-venafi.git")
+            run("git clone -b "+branchName+" --single-branch "+repo)
             run("pip3 install "+localBranchFolder+"openstack-heat-venafi/"+"openstack-heat-plugin-venafi")
 
 
