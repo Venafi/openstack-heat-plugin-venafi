@@ -220,7 +220,6 @@ class TestVenafiCertificate:
         stack_parameters = {'common_name': cn,
                             'sans': ["DNS:www.venafi.example.com","DNS:m.venafi.example.com"],
                             'api_key': os.environ['CLOUDAPIKEY'],
-                            'venafi_url': os.environ['CLOUDURL'],
                             'zone': os.environ['CLOUDZONE'],
                             }
         stack_name = 'cloud_cert_stack_'
