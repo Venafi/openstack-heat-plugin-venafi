@@ -10,13 +10,13 @@ STACK_NAME=venafi-tests-stack
 #STACK_TEMPLATE=venafi/resources/tests/fixtures/test_certificate.yml
 STACK_TEMPLATE=venafi/resources/tests/fixtures/test_certificate_output_only.yml
 
-default: deploy test
+default: install test
 
-deploy:
-	python venafi/resources/tests/deploy_venafi_certificate_plugin.py
+install:
+	fab install -f openstack-heat-plugin-venafi/resources/tests/install_venafi_certificate_plugin.py
 
 test:
-	pytest -W ignore venafi/resources/tests/
+	pytest -W ignore openstack-heat-plugin-venafi/resources/tests/
 
 e2e_fake_create:
 	$(eval RANDOM_SITE := $(shell echo $(RANDOM_SITE_EXP)))

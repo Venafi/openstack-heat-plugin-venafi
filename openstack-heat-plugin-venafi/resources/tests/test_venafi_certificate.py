@@ -79,12 +79,12 @@ class TestVenafiCertificate:
 
     def _prepare_tests(self, fixture, stack_name, stack_parameters):
         kwargs = {
-            'auth_url': os.environ['OS_AUTH_URL'],
-            'username': 'demo',
-            'password': os.environ['OS_PASSWORD'],
-            'project_name': 'demo',
-            'user_domain_name': 'default',
-            'project_domain_name': 'default'
+            'auth_url': os.environ['OPENSTACK_AUTH_URL'],
+            'username': os.environ['OPENSTACK_USER'],
+            'password': os.environ['OPENSTACK_PASSWORD'],
+            'project_name': os.environ['OPENSTACK_PROJECT'],
+            'user_domain_name': os.environ['OPENSTACK_USER_DOMAIN'],
+            'project_domain_name': os.environ['OPENSTACK_PROJECT_DOMAIN'],
         }
 
         loader = loading.get_plugin_loader('password')
@@ -200,14 +200,26 @@ class TestVenafiCertificate:
                             'trust_bundle': os.environ['TRUST_BUNDLE']
                             }
         stack_name = 'tpp_cert_stack_'
-        self._venafi_enroll(stack_name, stack_parameters, 180)
+        self._venafi_enroll(stack_name, stack_parameters, 240)
+
+    def test_tpp_enroll_cert_access_token(self):
+        cn = randomString(10) + '-access-token-tpp.venafi.example.com'
+        stack_parameters = {'common_name': cn,
+                            'sans': ["IP:192.168.1.1", "DNS:www.venafi.example.com", "DNS:m.venafi.example.com",
+                                     "email:test@venafi.com", "IP Address:192.168.2.2"],
+                            'access_token': os.environ['TPP_ACCESS_TOKEN'],
+                            'venafi_url': os.environ['TPPTOKENURL'],
+                            'zone': os.environ['TPPZONE'],
+                            'trust_bundle': os.environ['TRUST_BUNDLE']
+                            }
+        stack_name = 'tpp_cert_access_token_stack_'
+        self._venafi_enroll(stack_name, stack_parameters, 240)
 
     def test_cloud_enroll_cert(self):
         cn = randomString(10) + '-cloud.venafi.example.com'
         stack_parameters = {'common_name': cn,
                             'sans': ["DNS:www.venafi.example.com","DNS:m.venafi.example.com"],
                             'api_key': os.environ['CLOUDAPIKEY'],
-                            'venafi_url': os.environ['CLOUDURL'],
                             'zone': os.environ['CLOUDZONE'],
                             }
         stack_name = 'cloud_cert_stack_'

@@ -23,6 +23,10 @@ parameters:
     type: string
     default: ""
     hidden: true
+  access_token:
+    type: string
+    default: ""
+    hidden: true
   #Cloud credentials parameters
   api_key:
     type: string
@@ -59,6 +63,7 @@ resources:
       api_key: { get_param: api_key }
       tpp_user: { get_param: tpp_user }
       tpp_password: { get_param: tpp_password }
+      access_token: { get_param: access_token }
       fake: { get_param: fake }
       trust_bundle: { get_param: trust_bundle }
       save_private_key: { get_param: save_private_key }
