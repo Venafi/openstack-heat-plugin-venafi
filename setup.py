@@ -24,17 +24,17 @@ setup(
     description='Venafi Inc. OpenStack Heat Plugin',
     long_description='Venafi Inc. OpenStack Heat Plugin',
     license='Apache License, Version 2.0',
-    version=u"0.0.11",
+    version=u"0.1.0",
     author='Venafi Inc.',
     author_email='opensource@venafi.com',
     url='https://github.com/Venafi/openstack-heat-plugin-venafi',
     keywords=['venafi', 'openstack', 'heat', 'ssl', 'certificates'],
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     install_requires=[
-        'vcert >= 0.6.1'
+        'vcert >= 0.9.0'
     ],
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 4 - Beta',
         'License :: OSI Approved :: Apache Software License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
