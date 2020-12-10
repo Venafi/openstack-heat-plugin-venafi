@@ -81,4 +81,3 @@ outputs:
     value: { get_attr: [venafi_certificate, private_key] }
   venafi_csr:
     value: { get_attr: [venafi_certificate, csr] }
-
