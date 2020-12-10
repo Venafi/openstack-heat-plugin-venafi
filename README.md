@@ -87,7 +87,8 @@ openstack stack create -t venafi/resources/tests/fixtures/test_certificate.yml \
 --parameter common_name="common-name.venafi.example" \
 --parameter sans="DNS:dns-san-1.venafi.example","DNS:dns-san-2.venafi.example" \
 --parameter api_key="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" \
---parameter zone="zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz"
+--parameter zone="zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz" \
+venafi-test-stack-02
 ```
 
 ##### ASCIINEMA video:
