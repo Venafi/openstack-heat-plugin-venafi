@@ -14,13 +14,20 @@ parameters:
     default: 'fake.cert.example.com'
   sans:
     type: comma_delimited_list
+    label: Subject Alternative Names
     default: []
   #TPP credentials parameters
+  access_token:
+    type: string
+    default: ""
+    hidden: true
   tpp_user:
     type: string
+    description: Deprecated, use access_token instead
     default: ""
   tpp_password:
     type: string
+    description: Deprecated, use access_token instead
     default: ""
     hidden: true
   #Cloud credentials parameters
@@ -38,12 +45,12 @@ parameters:
   #TPP or Cloud policy name
   zone:
     type: string
-    default: "Default"
-  #Set it to true if you want to use face connecto for testing purposes
+    default: ""
+  #Set to true to use fake connector for testing purposes
   fake:
     type: boolean
     default: "false"
-  #Save or not to save private key in stack
+  #Whether or not to save private key in the stack
   save_private_key:
     type: boolean
     default: "true"
@@ -68,15 +75,15 @@ resources:
       name: 'venafi certificate'
       zone: { get_param: zone }
       common_name: { get_param: common_name }
+      sans: { get_param: sans }
       venafi_url: { get_param: venafi_url }
       api_key: { get_param: api_key }
+      access_token: { get_param: access_token }
       tpp_user: { get_param: tpp_user }
       tpp_password: { get_param: tpp_password }
       fake: { get_param: fake }
       trust_bundle: { get_param: trust_bundle }
       save_private_key: { get_param: save_private_key }
-      sans:
-        { get_param: sans }
 
   ssl_config:
     type: OS::Heat::CloudConfig
