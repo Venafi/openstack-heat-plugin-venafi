@@ -60,10 +60,9 @@ e2e_show:
 	openstack stack output show $(STACK_NAME)  venafi_certificate
 	openstack stack output show $(STACK_NAME)  venafi_certificate -c output_value -f shell
 
-package:
+publish:
+	pip3 install twine setuptools wheel
 	rm -rf dist/
 	rm -rf openstack_heat_plugin_venafi.egg-info
 	python3 setup.py sdist bdist_wheel
-
-upload:
 	twine upload dist/*
