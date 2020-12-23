@@ -7,3 +7,5 @@ openstack_heat_plugin_venafi.egg-info
 dist
 build
 openstack-heat-plugin-venafi/__pycache__/
+openstack-heat-plugin-venafi/resources/__pycache__/
+openstack-heat-plugin-venafi/resources/tests/__pycache__/
