@@ -173,6 +173,9 @@ class TestVenafiCertificate:
         )
         assert pkey_public_key_pem == cert_public_key_pem
 
+        #after performing the validations, then just remove the created stack
+        client.stacks.delete(stack_randomized_name)
+
     # Testing random string template to check that Heat is operating normally.
     # def test_random_string(self):
     #     self._prepare_tests("random_string.yml", 'random_string_stack_', None)
