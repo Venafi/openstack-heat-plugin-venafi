@@ -15,10 +15,11 @@
 # limitations under the License.
 #
 
-import pathlib
+
 from __future__ import absolute_import, print_function, unicode_literals
 from setuptools import setup
 from setuptools import find_packages
+import pathlib
 
 # The directory containing this file
 HERE = pathlib.Path(__file__).parent
