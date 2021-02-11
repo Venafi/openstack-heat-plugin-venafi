@@ -33,7 +33,7 @@ setup(
     long_description=README,
     long_description_content_type="text/markdown",
     license='Apache License, Version 2.0',
-    version=u"0.1.1",
+    version=u"0.2.0",
     author='Venafi Inc.',
     author_email='opensource@venafi.com',
     url='https://www.venafi.com/',
@@ -44,7 +44,7 @@ setup(
     keywords=['venafi', 'openstack', 'heat', 'ssl', 'certificates'],
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     install_requires=[
-        'vcert >= 0.9.0'
+        'vcert >= 0.10.0'
     ],
     classifiers=[
         'Development Status :: 4 - Beta',
