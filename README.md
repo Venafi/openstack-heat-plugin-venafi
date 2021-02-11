@@ -81,13 +81,13 @@ venafi-test-stack-01
 [![asciicast](https://asciinema.org/a/68jJnqif98QYI4Acn3ot323xt.svg)](https://asciinema.org/a/68jJnqif98QYI4Acn3ot323xt)
 
 #### For Venafi Cloud:
-Get the Zone ID value to use from the Venafi Cloud web console.
+The Zone value is a Venafi Cloud Application Name and Issuing Template API Alias (e.g. "Business App\Enterprise CIT").
 ```bash
 openstack stack create -t venafi/resources/tests/fixtures/test_certificate.yml \
 --parameter common_name="common-name.venafi.example" \
 --parameter sans="DNS:dns-san-1.venafi.example","DNS:dns-san-2.venafi.example" \
 --parameter api_key="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" \
---parameter zone="zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz" \
+--parameter zone="Business App\\Enterprise CIT" \
 venafi-test-stack-02
 ```
 
