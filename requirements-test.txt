@@ -89,7 +89,7 @@ pluggy==0.13.1
 ply==3.11
 prettytable==0.7.2
 psutil==5.6.6
-py==1.9.0
+py==1.10.0
 pyasn1==0.4.5
 pycadf==2.9.0
 pycparser==2.19
