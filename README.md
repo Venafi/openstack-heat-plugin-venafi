@@ -1,7 +1,7 @@
 ![Venafi](Venafi_logo.png)
 [![Apache 2.0 License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 ![Community Supported](https://img.shields.io/badge/Support%20Level-Community-brightgreen)
-![Compatible with TPP 17.3+ & Cloud](https://img.shields.io/badge/Compatibility-TPP%2017.3+%20%26%20Cloud-f9a90c)  
+![Compatible with TPP 17.3+ & VaaS](https://img.shields.io/badge/Compatibility-TPP%2017.3+%20%26%20VaaS-f9a90c)  
 _**This open source project is community-supported.** To report a problem or share an idea, use
 **[Issues](../../issues)**; and if you have a suggestion for fixing the issue, please include those details, too.
 In addition, use **[Pull Requests](../../pulls)** to contribute actual bug fixes or proposed enhancements.
@@ -15,12 +15,12 @@ This solution implements an OpenStack [Heat plugin](https://wiki.openstack.org/w
 that uses the [VCert-Python](https://github.com/Venafi/vcert-python) library to simplify
 enrollment of TLS certificates needed for stacks while ensuring their compliance with enterprise
 security policy. The plugin is designed to be a used in a Heat template to request a certificate
-from [Venafi Platform](https://www.venafi.com/platform/trust-protection-platform) or
-[Venafi Cloud](https://pki.venafi.com/venafi-cloud/) for a Heat resource.
+from [Venafi Trust Protection Platform](https://www.venafi.com/platform/trust-protection-platform) or
+[Venafi as a Service](https://www.venafi.com/venaficloud) for a Heat resource.
 
 ### Installation
-You should install pip packages into same python python which is used by heat-engine. Instructions may be different 
-for your openstack installation.
+You should install pip packages into same python environment that is used by heat-engine. Instructions may
+differ for your OpenStack installation.
 1. Switch to openstack user
 
 1. Determine python dist-package directory:
@@ -58,7 +58,7 @@ Review the provided example YAML [test_certificate.yml](openstack-heat-plugin-ve
 It is strongly recommended to export credentials as variables and add them as hidden parameters to
 the stack rather than hardcoding them in your configuration.
 
-#### For Venafi Platform:
+#### For Trust Protection Platform:
 In most cases you will need to specify a trust bundle because the Venafi Platform is commonly
 secured using a certificate issued by a private enterprise PKI.  In order to specify a
 `trust_bundle` you must first base64 encode the file contents:
@@ -80,8 +80,9 @@ venafi-test-stack-01
 ##### ASCIINEMA video:
 [![asciicast](https://asciinema.org/a/68jJnqif98QYI4Acn3ot323xt.svg)](https://asciinema.org/a/68jJnqif98QYI4Acn3ot323xt)
 
-#### For Venafi Cloud:
-The Zone value is a Venafi Cloud Application Name and Issuing Template API Alias (e.g. "Business App\Enterprise CIT").
+#### For Venafi as a Service:
+The zone value for Venafi as a Service is comprised of an Application name and an Issuing Template API Alias that 
+is associated with the Application (e.g. "Business App\Enterprise CIT").
 ```bash
 openstack stack create -t venafi/resources/tests/fixtures/test_certificate.yml \
 --parameter common_name="common-name.venafi.example" \
