@@ -31,7 +31,7 @@ def install():
     result = run('sudo systemctl restart devstack@h-eng')
     print(result)
     # TODO: rewrite sleep to check of "systemctl status devstack@h-eng"
-    time.sleep(20)
+    time.sleep(40)
     try:
         result = run('journalctl -q -u devstack@h-eng.service --since '
                        '"2 minutes ago"|grep "OS::Nova::VenafiCertificate"')
