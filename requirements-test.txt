@@ -76,7 +76,7 @@ oslo.reports==1.29.2
 oslo.serialization==2.29.1
 oslo.service==1.39.0
 oslo.upgradecheck==0.2.1
-oslo.utils==3.41.0
+oslo.utils==4.10.1
 oslo.versionedobjects==1.36.0
 osprofiler==2.8.0
 paramiko==2.4.2
