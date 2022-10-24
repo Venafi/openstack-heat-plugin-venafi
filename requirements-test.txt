@@ -79,7 +79,7 @@ oslo.upgradecheck==0.2.1
 oslo.utils==3.41.0
 oslo.versionedobjects==1.36.0
 osprofiler==2.8.0
-paramiko==2.4.2
+paramiko==2.10.1
 Paste==3.0.8
 PasteDeploy==2.0.1
 patchwork==1.0.1
