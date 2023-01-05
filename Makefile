@@ -13,7 +13,7 @@ STACK_TEMPLATE=venafi/resources/tests/fixtures/test_certificate_output_only.yml
 default: install test
 
 install:
-	fab install -f openstack-heat-plugin-venafi/resources/tests/install_venafi_certificate_plugin.py
+	fab install -r openstack-heat-plugin-venafi/resources/tests/install_venafi_certificate_plugin.py
 
 test:
 	pytest -W ignore openstack-heat-plugin-venafi/resources/tests/
