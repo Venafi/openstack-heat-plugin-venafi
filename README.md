@@ -11,6 +11,8 @@ We welcome and appreciate all contributions. Got questions or want to discuss so
 Venafi Heat Plugin for OpenStack
 ================================
 
+:warning: **This community-supported open source project has reached its END-OF-LIFE, and as of May 30th 2025, this project is deprecated and will no longer be maintained**.
+
 This solution implements an OpenStack [Heat plugin](https://wiki.openstack.org/wiki/Heat/Plugins)
 that uses the [VCert-Python](https://github.com/Venafi/vcert-python) library to simplify
 enrollment of TLS certificates needed for stacks while ensuring their compliance with enterprise
